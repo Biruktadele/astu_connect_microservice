@@ -1,0 +1,56 @@
+import logging
+from pathlib import Path
+
+from contextlib import asynccontextmanager
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+
+from .core.config import settings
+from .interface.api.endpoints import gateway
+
+logging.basicConfig(level=logging.INFO)
+
+# Test web app: in Docker use /app/web (volume); locally use project root / astuconnect_web
+WEB_DIR = Path("/app/web") if (Path("/app/web").is_dir()) else (Path(__file__).resolve().parent.parent.parent / "astuconnect_web")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    yield
+    client = gateway.get_client()
+    await client.aclose()
+
+
+app = FastAPI(title=settings.PROJECT_NAME, lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(gateway.router)
+
+if WEB_DIR.is_dir():
+    app.mount("/web", StaticFiles(directory=str(WEB_DIR), html=True), name="web")
+
+
+@app.get("/health/live")
+def liveness():
+    return {"status": "ok"}
+
+
+@app.get("/health/ready")
+def readiness():
+    return {"status": "ok"}
+
+
+@app.get("/")
+def root():
+    if WEB_DIR.is_dir():
+        from fastapi.responses import RedirectResponse
+        return RedirectResponse(url="/web/")
+    return {"message": "ASTU Connect API Gateway", "docs": "/docs"}

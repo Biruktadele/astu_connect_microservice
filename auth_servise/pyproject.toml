@@ -1,0 +1,17 @@
+[project]
+name = "auth-servise"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "python-jose[cryptography]",
+    "bcrypt",
+    "python-multipart",
+    "sqlalchemy",
+    "psycopg2-binary",
+    "python-dotenv",
+    "pydantic-settings",
+]

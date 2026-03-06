@@ -1,0 +1,15 @@
+[project]
+name = "media-service"
+version = "0.1.0"
+description = "ASTU Connect Media Service"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "python-jose[cryptography]",
+    "pydantic-settings",
+    "minio",
+    "cloudinary",
+    "pillow",
+    "python-multipart",
+]

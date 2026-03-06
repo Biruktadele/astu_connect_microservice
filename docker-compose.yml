@@ -1,0 +1,260 @@
+services:
+  # ── Infrastructure ──────────────────────────────────────────────
+
+  identity-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: identity_user
+      POSTGRES_PASSWORD: identity_pass
+      POSTGRES_DB: identity_db
+    ports: ["5432:5432"]
+    volumes: [identity_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U identity_user -d identity_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [astu]
+
+  feed-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: feed_user
+      POSTGRES_PASSWORD: feed_pass
+      POSTGRES_DB: feed_db
+    ports: ["5433:5432"]
+    volumes: [feed_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U feed_user -d feed_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [astu]
+
+  community-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: community_user
+      POSTGRES_PASSWORD: community_pass
+      POSTGRES_DB: community_db
+    ports: ["5434:5432"]
+    volumes: [community_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U community_user -d community_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [astu]
+
+  notification-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: notification_user
+      POSTGRES_PASSWORD: notification_pass
+      POSTGRES_DB: notification_db
+    ports: ["5435:5432"]
+    volumes: [notification_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U notification_user -d notification_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks: [astu]
+
+  cassandra:
+    image: cassandra:4.1
+    ports: ["9042:9042"]
+    volumes: [cassandra_data:/var/lib/cassandra]
+    environment:
+      CASSANDRA_CLUSTER_NAME: astu-chat
+      HEAP_NEWSIZE: 128M
+      MAX_HEAP_SIZE: 512M
+    healthcheck:
+      test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
+      interval: 15s
+      timeout: 10s
+      retries: 15
+      start_period: 60s
+    networks: [astu]
+
+  redis-feed:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+    command: redis-server --appendonly yes
+    volumes: [redis_feed_data:/data]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks: [astu]
+
+  redis-chat:
+    image: redis:7-alpine
+    ports: ["6380:6379"]
+    command: redis-server --appendonly yes
+    volumes: [redis_chat_data:/data]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks: [astu]
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks: [astu]
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    depends_on: [zookeeper]
+    ports: ["9092:9092", "29092:29092"]
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 45s
+    networks: [astu]
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+    ports: ["9200:9200"]
+    volumes: [es_data:/usr/share/elasticsearch/data]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health | grep -qE '\"status\":\"(green|yellow)\"'"]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 90s
+    networks: [astu]
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports: ["9000:9000", "9001:9001"]
+    volumes: [minio_data:/data]
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [astu]
+
+  # ── Application Services ────────────────────────────────────────
+
+  identity-service:
+    build: ./identity_service
+    ports: ["8001:8000"]
+    env_file: [.env]
+    depends_on:
+      identity-db: { condition: service_healthy }
+      kafka: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/live')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    networks: [astu]
+
+  feed-service:
+    build: ./feed_service
+    ports: ["8002:8000"]
+    env_file: [.env]
+    depends_on:
+      feed-db: { condition: service_healthy }
+      kafka: { condition: service_healthy }
+      redis-feed: { condition: service_healthy }
+    networks: [astu]
+
+  chat-service:
+    build: ./chat_service
+    ports: ["8003:8000"]
+    env_file: [.env]
+    depends_on:
+      cassandra: { condition: service_healthy }
+      kafka: { condition: service_healthy }
+      redis-chat: { condition: service_healthy }
+    networks: [astu]
+
+  community-service:
+    build: ./community_service
+    ports: ["8004:8000"]
+    env_file: [.env]
+    depends_on:
+      community-db: { condition: service_healthy }
+      kafka: { condition: service_healthy }
+    networks: [astu]
+
+  notification-service:
+    build: ./notification_service
+    ports: ["8005:8000"]
+    env_file: [.env]
+    depends_on:
+      notification-db: { condition: service_healthy }
+      kafka: { condition: service_healthy }
+    networks: [astu]
+
+  media-service:
+    build: ./media_service
+    ports: ["8006:8000"]
+    env_file: [.env]
+    depends_on:
+      minio: { condition: service_healthy }
+    networks: [astu]
+
+  search-service:
+    build: ./search_service
+    ports: ["8007:8000"]
+    env_file: [.env]
+    depends_on:
+      elasticsearch: { condition: service_healthy }
+      kafka: { condition: service_healthy }
+    networks: [astu]
+
+  api-gateway:
+    build: ./api_gateway
+    ports: ["8000:8000"]
+    env_file: [.env]
+    volumes: ["./astuconnect_web:/app/web:ro"]
+    depends_on:
+      identity-service: { condition: service_healthy }
+    networks: [astu]
+
+networks:
+  astu:
+    driver: bridge
+
+volumes:
+  identity_data:
+  feed_data:
+  community_data:
+  notification_data:
+  cassandra_data:
+  redis_feed_data:
+  redis_chat_data:
+  es_data:
+  minio_data:

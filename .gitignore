@@ -1,0 +1,51 @@
+# Environment variables
+.env
+.env.*
+*.env
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Type checking
+.mypy_cache/
+
+# Docker
+*.pid
+
+# Node (for frontend if needed)
+node_modules/
+
+# Your frontend
+astuconnect_web/
+
+# Documentation drafts
+PRE_LAUNCH.md

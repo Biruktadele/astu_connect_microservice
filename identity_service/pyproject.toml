@@ -1,0 +1,18 @@
+[project]
+name = "identity-service"
+version = "0.1.0"
+description = "ASTU Connect Identity & Auth Service"
+requires-python = ">=3.12"
+scripts = { serve = "main:serve" }
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "python-jose[cryptography]",
+    "bcrypt",
+    "python-multipart",
+    "sqlalchemy",
+    "psycopg2-binary",
+    "pydantic-settings",
+    "email-validator",
+    "aiokafka",
+]
