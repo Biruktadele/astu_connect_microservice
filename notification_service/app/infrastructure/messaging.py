@@ -3,6 +3,7 @@ import json
 import logging
 import uuid
 from datetime import datetime
+from functools import partial
 
 from aiokafka import AIOKafkaConsumer
 from ..core.config import settings
@@ -65,7 +66,8 @@ class NotificationConsumer:
                 if not self._running:
                     break
                 try:
-                    self._handle(msg.value)
+                    loop = asyncio.get_event_loop()
+                    await loop.run_in_executor(None, self._handle, msg.value)
                 except Exception:
                     logger.exception("Notification event error")
         finally:

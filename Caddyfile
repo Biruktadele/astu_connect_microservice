@@ -1,0 +1,32 @@
+# Caddyfile — ASTU Connect Reverse Proxy
+#
+# LOCAL DEVELOPMENT:
+#   Caddy will serve on http://localhost with automatic HTTPS for localhost.
+#   Access the app at: http://localhost (redirects to HTTPS automatically)
+#
+# PRODUCTION:
+#   Replace ":80" below with your actual domain, e.g.:
+#       astu.example.com { ... }
+#   Caddy will automatically obtain a Let's Encrypt TLS certificate.
+#   Make sure ports 80 + 443 are open on your server firewall.
+
+:80 {
+    # Proxy all traffic to the API gateway (internal Docker network)
+    reverse_proxy api-gateway:8000
+
+    # Security headers
+    header {
+        X-Frame-Options DENY
+        X-Content-Type-Options nosniff
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy strict-origin-when-cross-origin
+        -Server
+    }
+
+    # Enable access logging
+    log {
+        output stdout
+        format json
+        level INFO
+    }
+}

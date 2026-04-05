@@ -5,9 +5,8 @@ services:
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: identity_user
-      POSTGRES_PASSWORD: identity_pass
+      POSTGRES_PASSWORD: id_P@ss!2024xQ
       POSTGRES_DB: identity_db
-    ports: ["5432:5432"]
     volumes: [identity_data:/var/lib/postgresql/data]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U identity_user -d identity_db"]
@@ -21,9 +20,8 @@ services:
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: feed_user
-      POSTGRES_PASSWORD: feed_pass
+      POSTGRES_PASSWORD: fd_P@ss!2024xQ
       POSTGRES_DB: feed_db
-    ports: ["5433:5432"]
     volumes: [feed_data:/var/lib/postgresql/data]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U feed_user -d feed_db"]
@@ -37,9 +35,8 @@ services:
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: community_user
-      POSTGRES_PASSWORD: community_pass
+      POSTGRES_PASSWORD: cm_P@ss!2024xQ
       POSTGRES_DB: community_db
-    ports: ["5434:5432"]
     volumes: [community_data:/var/lib/postgresql/data]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U community_user -d community_db"]
@@ -53,9 +50,8 @@ services:
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: notification_user
-      POSTGRES_PASSWORD: notification_pass
+      POSTGRES_PASSWORD: nt_P@ss!2024xQ
       POSTGRES_DB: notification_db
-    ports: ["5435:5432"]
     volumes: [notification_data:/var/lib/postgresql/data]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U notification_user -d notification_db"]
@@ -69,9 +65,8 @@ services:
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: gamification_user
-      POSTGRES_PASSWORD: gamification_pass
+      POSTGRES_PASSWORD: gm_P@ss!2024xQ
       POSTGRES_DB: gamification_db
-    ports: ["5436:5432"]
     volumes: [gamification_data:/var/lib/postgresql/data]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U gamification_user -d gamification_db"]
@@ -83,7 +78,6 @@ services:
 
   cassandra:
     image: cassandra:4.1
-    ports: ["9042:9042"]
     volumes: [cassandra_data:/var/lib/cassandra]
     environment:
       CASSANDRA_CLUSTER_NAME: astu-chat
@@ -99,7 +93,6 @@ services:
 
   redis-feed:
     image: redis:7-alpine
-    ports: ["6379:6379"]
     command: redis-server --appendonly yes
     volumes: [redis_feed_data:/data]
     healthcheck:
@@ -111,7 +104,6 @@ services:
 
   redis-chat:
     image: redis:7-alpine
-    ports: ["6380:6379"]
     command: redis-server --appendonly yes
     volumes: [redis_chat_data:/data]
     healthcheck:
@@ -152,12 +144,12 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
     environment:
       - discovery.type=single-node
-      - xpack.security.enabled=false
+      - xpack.security.enabled=true
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
       - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
-    ports: ["9200:9200"]
     volumes: [es_data:/usr/share/elasticsearch/data]
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health | grep -qE '\"status\":\"(green|yellow)\"'"]
+      test: ["CMD-SHELL", "curl -sf -u elastic:${ELASTIC_PASSWORD} http://localhost:9200/_cluster/health | grep -qE '\"status\":\"(green|yellow)\"'"]
       interval: 10s
       timeout: 10s
       retries: 15
@@ -165,12 +157,12 @@ services:
     networks: [astu]
 
   minio:
-    image: minio/minio:latest
+    image: minio/minio:RELEASE.2024-11-07T00-52-20Z
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-    ports: ["9000:9000", "9001:9001"]
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+    ports: ["9001:9001"]  # console only; API is internal
     volumes: [minio_data:/data]
     healthcheck:
       test: ["CMD", "mc", "ready", "local"]
@@ -183,7 +175,6 @@ services:
 
   identity-service:
     build: ./identity_service
-    ports: ["8001:8000"]
     env_file: [.env]
     depends_on:
       identity-db: { condition: service_healthy }
@@ -194,72 +185,133 @@ services:
       timeout: 5s
       retries: 10
       start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+          cpus: "0.5"
     networks: [astu]
 
   feed-service:
     build: ./feed_service
-    ports: ["8002:8000"]
     env_file: [.env]
     depends_on:
       feed-db: { condition: service_healthy }
       kafka: { condition: service_healthy }
       redis-feed: { condition: service_healthy }
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+          cpus: "0.5"
     networks: [astu]
 
   chat-service:
     build: ./chat_service
-    ports: ["8003:8000"]
     env_file: [.env]
     depends_on:
       cassandra: { condition: service_healthy }
       kafka: { condition: service_healthy }
       redis-chat: { condition: service_healthy }
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+          cpus: "0.5"
     networks: [astu]
 
   community-service:
     build: ./community_service
-    ports: ["8004:8000"]
     env_file: [.env]
     depends_on:
       community-db: { condition: service_healthy }
       kafka: { condition: service_healthy }
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+          cpus: "0.5"
     networks: [astu]
 
   notification-service:
     build: ./notification_service
-    ports: ["8005:8000"]
     env_file: [.env]
     depends_on:
       notification-db: { condition: service_healthy }
       kafka: { condition: service_healthy }
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+          cpus: "0.25"
     networks: [astu]
 
   media-service:
     build: ./media_service
-    ports: ["8006:8000"]
     env_file: [.env]
     depends_on:
       minio: { condition: service_healthy }
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+          cpus: "0.5"
     networks: [astu]
 
   search-service:
     build: ./search_service
-    ports: ["8007:8000"]
     env_file: [.env]
     depends_on:
       elasticsearch: { condition: service_healthy }
       kafka: { condition: service_healthy }
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+          cpus: "0.25"
+    networks: [astu]
+
+  gamification-service:
+    build: ./gamification_service
+    env_file: [.env]
+    depends_on:
+      gamification-db: { condition: service_healthy }
+      kafka: { condition: service_healthy }
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+          cpus: "0.25"
     networks: [astu]
 
   api-gateway:
     build: ./api_gateway
-    ports: ["8000:8000"]
     env_file: [.env]
     volumes:
       - "./astuconnect_web:/app/web:ro"
       - "./admin_web:/app/admin_web:ro"
     depends_on:
       identity-service: { condition: service_healthy }
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+          cpus: "0.5"
+    networks: [astu]
+
+  caddy:
+    image: caddy:2-alpine
+    ports: ["80:80", "443:443"]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [api-gateway]
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+          cpus: "0.25"
     networks: [astu]
 
 networks:
@@ -277,3 +329,5 @@ volumes:
   es_data:
   gamification_data:
   minio_data:
+  caddy_data:
+  caddy_config:

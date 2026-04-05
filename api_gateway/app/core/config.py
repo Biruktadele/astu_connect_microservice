@@ -19,6 +19,15 @@ class Settings(BaseSettings):
     RATE_LIMIT_PER_MINUTE: int = 120
     RATE_LIMIT_AUTH_PER_MINUTE: int = 20
 
+    # Comma-separated list of allowed CORS origins
+    CORS_ORIGINS: str = "http://localhost:3000"
+
+    # Redis URL used for distributed rate limiting (uses redis-feed)
+    REDIS_URL: str = "redis://redis-feed:6379/0"
+
+    # Set to true in production to disable /docs and /redoc
+    PRODUCTION: bool = False
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 

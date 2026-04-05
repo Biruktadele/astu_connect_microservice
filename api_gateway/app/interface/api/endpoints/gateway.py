@@ -78,7 +78,7 @@ async def proxy(request: Request, path: str):
     rate_limit = settings.RATE_LIMIT_AUTH_PER_MINUTE if is_auth_endpoint else settings.RATE_LIMIT_PER_MINUTE
     rate_key = f"{client_ip}:{full_path.split('/')[3] if len(full_path.split('/')) > 3 else 'default'}"
 
-    if not rate_limiter.is_allowed(rate_key, rate_limit):
+    if not await rate_limiter.is_allowed_async(rate_key, rate_limit):
         raise HTTPException(
             status_code=429,
             detail="Rate limit exceeded",
@@ -127,7 +127,7 @@ async def proxy(request: Request, path: str):
     response_headers.pop("content-encoding", None)
     response_headers.pop("content-length", None)
     response_headers.pop("transfer-encoding", None)
-    response_headers["x-ratelimit-remaining"] = str(rate_limiter.remaining(rate_key, rate_limit))
+    response_headers["x-ratelimit-remaining"] = str(await rate_limiter.remaining_async(rate_key, rate_limit))
 
     return Response(
         content=resp.content,

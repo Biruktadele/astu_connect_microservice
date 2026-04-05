@@ -9,4 +9,5 @@ dependencies = [
     "python-jose[cryptography]",
     "pydantic-settings",
     "httpx",
+    "redis[hiredis]",
 ]
