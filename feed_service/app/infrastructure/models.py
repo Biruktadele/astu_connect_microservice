@@ -12,6 +12,7 @@ class PostModel(Base):
     reaction_counts = Column(JSON, default={"like": 0, "love": 0, "laugh": 0, "sad": 0, "angry": 0})
     comment_count = Column(Integer, default=0)
     is_deleted = Column(Boolean, default=False)
+    moderation_status = Column(String, default="approved", index=True)
     created_at = Column(DateTime, server_default=func.now(), index=True)
 
 

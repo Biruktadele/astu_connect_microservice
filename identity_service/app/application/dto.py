@@ -49,6 +49,7 @@ class UserResponse(BaseModel):
     is_active: bool
     email_verified: bool = False
     is_astu_student: bool = False
+    roles: list[str] = ["student"]
     created_at: datetime
     follower_count: int = 0
     following_count: int = 0

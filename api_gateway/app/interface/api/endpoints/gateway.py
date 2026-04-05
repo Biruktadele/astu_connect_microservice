@@ -15,15 +15,19 @@ router = APIRouter()
 ROUTE_MAP = {
     "/api/v1/auth": settings.IDENTITY_SERVICE_URL,
     "/api/v1/users": settings.IDENTITY_SERVICE_URL,
+    "/api/v1/admin": settings.IDENTITY_SERVICE_URL,
     "/api/v1/feed": settings.FEED_SERVICE_URL,
     "/api/v1/chat": settings.CHAT_SERVICE_URL,
     "/api/v1/communities": settings.COMMUNITY_SERVICE_URL,
     "/api/v1/notifications": settings.NOTIFICATION_SERVICE_URL,
     "/api/v1/media": settings.MEDIA_SERVICE_URL,
     "/api/v1/search": settings.SEARCH_SERVICE_URL,
+    "/api/v1/gamification": settings.GAMIFICATION_SERVICE_URL,
 }
 
 PUBLIC_PREFIXES = {"/api/v1/auth/login", "/api/v1/auth/register", "/api/v1/auth/refresh"}
+
+ADMIN_PREFIXES = {"/api/v1/admin", "/api/v1/feed/admin", "/api/v1/communities/admin"}
 
 _http_client = None
 
@@ -49,15 +53,16 @@ def _get_client_ip(request: Request) -> str:
     return request.client.host if request.client else "unknown"
 
 
-def _validate_token(auth_header: str) -> str:
+def _validate_token(auth_header: str) -> tuple[str, list[str]]:
+    """Returns (user_id, roles). Empty user_id on failure."""
     if not auth_header or not auth_header.startswith("Bearer "):
-        return ""
+        return "", []
     token = auth_header[7:]
     try:
         payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
-        return payload.get("sub", "")
+        return payload.get("sub", ""), payload.get("roles", [])
     except JWTError:
-        return ""
+        return "", []
 
 
 @router.api_route(
@@ -82,9 +87,13 @@ async def proxy(request: Request, path: str):
 
     if not is_auth_endpoint:
         auth_header = request.headers.get("authorization", "")
-        user_id = _validate_token(auth_header)
+        user_id, roles = _validate_token(auth_header)
         if not user_id:
             raise HTTPException(status_code=401, detail="Authentication required")
+
+        is_admin_route = any(full_path.startswith(p) for p in ADMIN_PREFIXES)
+        if is_admin_route and "admin" not in roles:
+            raise HTTPException(status_code=403, detail="Admin access required")
 
     backend_url = _resolve_backend(full_path)
     if not backend_url:

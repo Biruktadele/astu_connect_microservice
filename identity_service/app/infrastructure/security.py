@@ -20,10 +20,10 @@ def hash_password(password: str) -> str:
     ).decode("utf-8")
 
 
-def create_access_token(user_id: str) -> str:
-    expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+def create_access_token(user_id: str, roles: list[str] | None = None) -> str:
+    expire = datetime.utcnow() + timedelta(days=settings.ACCESS_TOKEN_EXPIRE_DAYS)
     return jwt.encode(
-        {"sub": user_id, "exp": expire, "iss": "astu-connect-identity"},
+        {"sub": user_id, "roles": roles or ["student"], "exp": expire, "iss": "astu-connect-identity"},
         settings.JWT_SECRET_KEY,
         algorithm=settings.JWT_ALGORITHM,
     )

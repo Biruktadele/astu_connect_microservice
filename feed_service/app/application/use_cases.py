@@ -1,9 +1,26 @@
+import logging
+import math
 from typing import Optional
+
+import redis
+
+from ..core.config import settings
 from ..domain.entities import Post, Comment, Reaction
 from ..domain.repositories import (
     PostRepository, CommentRepository, ReactionRepository,
     TimelineRepository, AuthorSnapshotRepository, EventPublisher,
 )
+
+logger = logging.getLogger(__name__)
+
+_moderation_redis = None
+
+
+def _get_moderation_redis():
+    global _moderation_redis
+    if _moderation_redis is None:
+        _moderation_redis = redis.Redis.from_url(settings.FEED_REDIS_URL, decode_responses=True)
+    return _moderation_redis
 
 
 class CreatePostUseCase:
@@ -13,6 +30,18 @@ class CreatePostUseCase:
 
     def execute(self, author_id: str, body: str, media_refs: list[str], community_id: Optional[str] = None) -> Post:
         post = Post(author_id=author_id, body=body, media_refs=media_refs, community_id=community_id)
+
+        if media_refs:
+            try:
+                r = _get_moderation_redis()
+                for url in media_refs:
+                    if r.exists(f"moderation:flagged:{url}"):
+                        post.moderation_status = "flagged"
+                        logger.warning("Post auto-flagged: media %s was flagged by moderation", url)
+                        break
+            except Exception:
+                logger.exception("Failed to check moderation flags in Redis")
+
         saved = self.post_repo.save(post)
         self.event_pub.publish(
             event_type="post.created",
@@ -108,6 +137,12 @@ class ReactToPostUseCase:
 
 
 class FetchTimelineUseCase:
+    """Builds a mixed feed from personal, recommended, and recent streams.
+
+    When the personal timeline is empty (cold start) the gap is filled
+    with more recommended and recent posts so the feed is never blank.
+    """
+
     def __init__(
         self, timeline_repo: TimelineRepository, post_repo: PostRepository,
         author_repo: AuthorSnapshotRepository, reaction_repo: ReactionRepository,
@@ -118,11 +153,51 @@ class FetchTimelineUseCase:
         self.reaction_repo = reaction_repo
 
     def execute(self, user_id: str, offset: int = 0, limit: int = 30, requester_id: str = "") -> list[dict]:
-        post_ids = self.timeline_repo.get_timeline(user_id, offset, limit)
-        if not post_ids:
+        personal_target = max(1, math.ceil(limit * settings.FEED_MIX_PERSONAL / 100))
+        recommended_target = max(1, math.ceil(limit * settings.FEED_MIX_RECOMMENDED / 100))
+        recent_target = max(1, math.ceil(limit * settings.FEED_MIX_RECENT / 100))
+
+        personal_ids = self.timeline_repo.get_timeline(user_id, offset, personal_target)
+        recommended_ids = self.timeline_repo.get_recommended(0, recommended_target + limit)
+        recent_ids = self.timeline_repo.get_recent(0, recent_target + limit)
+
+        if len(personal_ids) < personal_target:
+            gap = personal_target - len(personal_ids)
+            recommended_target += gap // 2 + gap % 2
+            recent_target += gap // 2
+
+        seen: set[str] = set()
+        merged: list[str] = []
+
+        for pid in personal_ids:
+            if pid not in seen:
+                seen.add(pid)
+                merged.append(pid)
+
+        added_rec = 0
+        for pid in recommended_ids:
+            if added_rec >= recommended_target:
+                break
+            if pid not in seen:
+                seen.add(pid)
+                merged.append(pid)
+                added_rec += 1
+
+        added_recent = 0
+        for pid in recent_ids:
+            if added_recent >= recent_target:
+                break
+            if pid not in seen:
+                seen.add(pid)
+                merged.append(pid)
+                added_recent += 1
+
+        if not merged:
             return []
-        posts = self.post_repo.find_by_ids(post_ids)
-        posts = [p for p in posts if not p.is_deleted]
+
+        posts = self.post_repo.find_by_ids(merged)
+        posts = [p for p in posts if not p.is_deleted and p.moderation_status != "rejected"]
+        posts.sort(key=lambda p: p.created_at, reverse=True)
 
         author_ids = list({p.author_id for p in posts})
         snapshots = self.author_repo.get_batch(author_ids)

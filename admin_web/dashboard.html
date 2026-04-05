@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASTU Connect Admin</title>
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+<div class="dashboard">
+  <aside class="sidebar">
+    <div class="logo"><span>ASTU</span> Admin</div>
+    <nav>
+      <a href="#" data-page="overview" class="active"><span>Overview</span></a>
+      <a href="#" data-page="users"><span>Users</span></a>
+      <a href="#" data-page="flagged"><span>Flagged Content</span></a>
+      <a href="#" data-page="posts"><span>All Posts</span></a>
+      <a href="#" data-page="communities"><span>Communities</span></a>
+    </nav>
+    <div class="logout"><button id="logoutBtn"><span>Logout</span></button></div>
+  </aside>
+  <main class="main">
+
+    <!-- Overview -->
+    <div id="page-overview" class="section active">
+      <h2 class="page-title">Dashboard Overview</h2>
+      <div class="stats-grid" id="overviewStats"></div>
+    </div>
+
+    <!-- Users -->
+    <div id="page-users" class="section">
+      <h2 class="page-title">User Management</h2>
+      <div class="toolbar">
+        <input type="text" id="userSearch" placeholder="Search by email or username...">
+        <select id="userStatusFilter"><option value="">All Status</option><option value="active">Active</option><option value="banned">Banned</option></select>
+      </div>
+      <table><thead><tr><th>Username</th><th>Email</th><th>Roles</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead><tbody id="usersTable"></tbody></table>
+      <div class="pagination" id="usersPagination"></div>
+    </div>
+
+    <!-- Flagged Content -->
+    <div id="page-flagged" class="section">
+      <h2 class="page-title">Flagged Content</h2>
+      <table><thead><tr><th>Media</th><th>Body</th><th>Author</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody id="flaggedTable"></tbody></table>
+      <div class="pagination" id="flaggedPagination"></div>
+    </div>
+
+    <!-- All Posts -->
+    <div id="page-posts" class="section">
+      <h2 class="page-title">All Posts</h2>
+      <table><thead><tr><th>Body</th><th>Author</th><th>Moderation</th><th>Comments</th><th>Date</th><th>Actions</th></tr></thead><tbody id="postsTable"></tbody></table>
+      <div class="pagination" id="postsPagination"></div>
+    </div>
+
+    <!-- Communities -->
+    <div id="page-communities" class="section">
+      <h2 class="page-title">Communities</h2>
+      <div class="toolbar">
+        <input type="text" id="communitySearch" placeholder="Search by name...">
+      </div>
+      <table><thead><tr><th>Name</th><th>Slug</th><th>Members</th><th>Visibility</th><th>Created</th><th>Actions</th></tr></thead><tbody id="communitiesTable"></tbody></table>
+      <div class="pagination" id="communitiesPagination"></div>
+    </div>
+
+  </main>
+</div>
+<script src="js/admin.js"></script>
+</body>
+</html>

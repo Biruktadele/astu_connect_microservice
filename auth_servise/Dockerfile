@@ -11,8 +11,9 @@ COPY pyproject.toml .
 # COPY uv.lock . # Uncomment if you have a lock file
 
 # Create virtual environment and install dependencies
+ENV UV_HTTP_TIMEOUT=120 UV_HTTP_RETRIES=6
 RUN uv venv /app/.venv && \
-    uv pip install .
+    (uv pip install . || uv pip install . || uv pip install .)
 
 # Stage 2: Runtime
 FROM python:3.12-slim

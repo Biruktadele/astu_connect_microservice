@@ -13,6 +13,7 @@ logging.basicConfig(level=logging.INFO)
 
 # Test web app: in Docker use /app/web (volume); locally use project root / astuconnect_web
 WEB_DIR = Path("/app/web") if (Path("/app/web").is_dir()) else (Path(__file__).resolve().parent.parent.parent / "astuconnect_web")
+ADMIN_DIR = Path("/app/admin_web") if (Path("/app/admin_web").is_dir()) else (Path(__file__).resolve().parent.parent.parent / "admin_web")
 
 
 @asynccontextmanager
@@ -36,6 +37,9 @@ app.include_router(gateway.router)
 
 if WEB_DIR.is_dir():
     app.mount("/web", StaticFiles(directory=str(WEB_DIR), html=True), name="web")
+
+if ADMIN_DIR.is_dir():
+    app.mount("/admin", StaticFiles(directory=str(ADMIN_DIR), html=True), name="admin")
 
 
 @app.get("/health/live")

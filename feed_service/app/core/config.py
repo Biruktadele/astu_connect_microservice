@@ -16,6 +16,16 @@ class Settings(BaseSettings):
     CELEBRITY_THRESHOLD: int = 1000
     TIMELINE_MAX_SIZE: int = 800
 
+    RECENT_TIMELINE_MAX_SIZE: int = 500
+    RECOMMENDED_TIMELINE_MAX_SIZE: int = 500
+    RECOMMENDED_MIN_SCORE: int = 3
+    FEED_MIX_PERSONAL: int = 60
+    FEED_MIX_RECOMMENDED: int = 20
+    FEED_MIX_RECENT: int = 20
+    FOLLOW_BACKFILL_COUNT: int = 10
+
+    COMMUNITY_SERVICE_URL: str = "http://community-service:8000"
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 

@@ -86,7 +86,7 @@ class LoginUserUseCase:
         if require_email_verification and not user.email_verified:
             raise ValueError("Verify your email to sign in")
 
-        access_token = create_access_fn(user.id)
+        access_token = create_access_fn(user.id, user.roles)
         raw_refresh = secrets.token_urlsafe(64)
         token_hash = hashlib.sha256(raw_refresh.encode()).hexdigest()
 
@@ -123,7 +123,7 @@ class RefreshTokenUseCase:
         if not user or not user.is_active:
             raise ValueError("User not found or inactive")
 
-        access_token = create_access_fn(user.id)
+        access_token = create_access_fn(user.id, user.roles)
         new_raw = secrets.token_urlsafe(64)
         new_hash = hashlib.sha256(new_raw.encode()).hexdigest()
         new_rt = RefreshToken(

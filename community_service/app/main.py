@@ -6,6 +6,7 @@ from .core.config import settings
 from .infrastructure.database import Base, engine
 from .infrastructure.messaging import outbox_relay
 from .interface.api.endpoints import communities
+from .interface.api.endpoints import admin as community_admin
 
 logging.basicConfig(level=logging.INFO)
 
@@ -21,6 +22,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title=settings.PROJECT_NAME, lifespan=lifespan)
 app.include_router(communities.router, prefix=settings.API_V1_STR)
+app.include_router(community_admin.router, prefix=settings.API_V1_STR)
 
 
 @app.get("/health/live")

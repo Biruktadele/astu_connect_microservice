@@ -64,6 +64,21 @@ class TimelineRepository(ABC):
     @abstractmethod
     def trim(self, user_id: str, max_size: int) -> None: ...
 
+    @abstractmethod
+    def push_recent(self, post_id: str, score: float) -> None: ...
+
+    @abstractmethod
+    def get_recent(self, offset: int, limit: int) -> list[str]: ...
+
+    @abstractmethod
+    def push_recommended(self, post_id: str, score: float) -> None: ...
+
+    @abstractmethod
+    def get_recommended(self, offset: int, limit: int) -> list[str]: ...
+
+    @abstractmethod
+    def update_score_recommended(self, post_id: str, score: float) -> None: ...
+
 
 class AuthorSnapshotRepository(ABC):
     @abstractmethod

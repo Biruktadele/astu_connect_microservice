@@ -17,6 +17,7 @@ def run_add_column_migrations():
         with engine.connect() as conn:
             conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT FALSE"))
             conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_astu_student BOOLEAN DEFAULT FALSE"))
+            conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS roles JSON DEFAULT '[\"student\"]'"))
             conn.commit()
         logger.info("Add-column migrations applied (if any)")
     except Exception as e:

@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     NOTIFICATION_SERVICE_URL: str = "http://notification-service:8000"
     MEDIA_SERVICE_URL: str = "http://media-service:8000"
     SEARCH_SERVICE_URL: str = "http://search-service:8000"
+    GAMIFICATION_SERVICE_URL: str = "http://gamification-service:8000"
 
     JWT_SECRET_KEY: str = "change-me"
     JWT_ALGORITHM: str = "HS256"

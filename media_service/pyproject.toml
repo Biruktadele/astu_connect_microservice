@@ -12,4 +12,7 @@ dependencies = [
     "cloudinary",
     "pillow",
     "python-multipart",
+    "nudenet",
+    "onnxruntime",
+    "redis",
 ]

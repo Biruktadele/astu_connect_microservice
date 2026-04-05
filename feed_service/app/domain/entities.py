@@ -18,6 +18,7 @@ class Post:
     reaction_counts: dict = field(default_factory=lambda: {"like": 0, "love": 0, "laugh": 0, "sad": 0, "angry": 0})
     comment_count: int = 0
     is_deleted: bool = False
+    moderation_status: str = "approved"
     created_at: datetime = field(default_factory=datetime.utcnow)
 
 

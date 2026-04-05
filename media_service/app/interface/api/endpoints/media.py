@@ -1,4 +1,7 @@
+import logging
 import uuid
+
+import redis
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from pydantic import BaseModel
 from typing import Optional
@@ -11,7 +14,20 @@ from ....infrastructure.cloudinary_client import (
     is_cloudinary_url,
 )
 from ....infrastructure.compression import get_media_type, compress_image, compress_video
+from ....infrastructure.moderation import scan_image as nsfw_scan_image, scan_video as nsfw_scan_video
+from ....core.config import settings
 from ..deps import get_current_user_id
+
+logger = logging.getLogger(__name__)
+
+_redis_client = None
+
+
+def _get_redis():
+    global _redis_client
+    if _redis_client is None:
+        _redis_client = redis.Redis.from_url(settings.FEED_REDIS_URL, decode_responses=True)
+    return _redis_client
 
 router = APIRouter(prefix="/media", tags=["media"])
 
@@ -33,6 +49,8 @@ class CloudinaryUploadResponse(BaseModel):
     secure_url: str
     public_id: str
     object_name: str
+    is_flagged: bool = False
+    moderation_labels: list[str] = []
 
 
 class DownloadRequest(BaseModel):
@@ -71,6 +89,11 @@ async def upload_media(
         data, content_type = compress_video(data, content_type, filename)
         resource_type = "video"
 
+    if media_type == "image":
+        moderation = nsfw_scan_image(data)
+    else:
+        moderation = nsfw_scan_video(data)
+
     folder = f"astu/{purpose}/{user_id}"
     public_id_prefix = f"{folder}/{uuid.uuid4().hex}"
 
@@ -81,9 +104,25 @@ async def upload_media(
             folder=folder,
             public_id_prefix=public_id_prefix,
         )
-        return CloudinaryUploadResponse(**result)
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Cloudinary upload failed: {e}")
+
+    is_flagged = moderation["is_flagged"]
+    labels = moderation["labels"]
+
+    if is_flagged:
+        try:
+            r = _get_redis()
+            r.setex(f"moderation:flagged:{result['secure_url']}", 7200, ",".join(labels))
+            logger.warning("Flagged media from user %s: %s — labels: %s", user_id, result["secure_url"], labels)
+        except Exception:
+            logger.exception("Failed to store moderation flag in Redis")
+
+    return CloudinaryUploadResponse(
+        **result,
+        is_flagged=is_flagged,
+        moderation_labels=labels,
+    )
 
 
 @router.post("/upload-url", response_model=UploadResponse)

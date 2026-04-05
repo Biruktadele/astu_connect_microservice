@@ -24,6 +24,7 @@ def _user_to_entity(m: UserModel) -> User:
         is_active=m.is_active, status=m.status,
         email_verified=m.email_verified,
         is_astu_student=m.is_astu_student,
+        roles=m.roles if m.roles else ["student"],
         created_at=m.created_at,
     )
 

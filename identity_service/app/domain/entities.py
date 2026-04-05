@@ -25,6 +25,7 @@ class User:
     status: str = "active"  # active | deactivating | deleted
     email_verified: bool = False
     is_astu_student: bool = False
+    roles: list = field(default_factory=lambda: ["student"])
     created_at: datetime = field(default_factory=datetime.utcnow)
 
     def deactivate(self) -> None:

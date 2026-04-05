@@ -20,6 +20,7 @@ class PostResponse(BaseModel):
     reaction_counts: dict = {}
     my_reaction: Optional[str] = None
     comment_count: int = 0
+    moderation_status: str = "approved"
     created_at: datetime
 
     model_config = {"from_attributes": True}

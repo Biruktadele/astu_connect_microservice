@@ -1,6 +1,6 @@
 """SQLAlchemy ORM models — infrastructure layer, not domain."""
 
-from sqlalchemy import Column, String, Integer, Boolean, DateTime, Text, func
+from sqlalchemy import Column, String, Integer, Boolean, DateTime, Text, JSON, func
 from .database import Base
 
 
@@ -20,6 +20,7 @@ class UserModel(Base):
     status = Column(String, default="active")
     email_verified = Column(Boolean, default=False)
     is_astu_student = Column(Boolean, default=False)
+    roles = Column(JSON, default=["student"])
     created_at = Column(DateTime, server_default=func.now())
 
 

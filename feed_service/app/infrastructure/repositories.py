@@ -140,6 +140,9 @@ class PgReactionRepository(ReactionRepository):
 
 
 class RedisTimelineRepository(TimelineRepository):
+    RECENT_KEY = "timeline:recent"
+    RECOMMENDED_KEY = "timeline:recommended"
+
     def __init__(self):
         self.r = redis.Redis.from_url(settings.FEED_REDIS_URL, decode_responses=True)
 
@@ -154,6 +157,24 @@ class RedisTimelineRepository(TimelineRepository):
 
     def trim(self, user_id: str, max_size: int) -> None:
         self.r.zremrangebyrank(f"timeline:{user_id}", 0, -(max_size + 1))
+
+    def push_recent(self, post_id: str, score: float) -> None:
+        self.r.zadd(self.RECENT_KEY, {post_id: score})
+        self.r.zremrangebyrank(self.RECENT_KEY, 0, -(settings.RECENT_TIMELINE_MAX_SIZE + 1))
+
+    def get_recent(self, offset: int = 0, limit: int = 30) -> list[str]:
+        return self.r.zrevrange(self.RECENT_KEY, offset, offset + limit - 1)
+
+    def push_recommended(self, post_id: str, score: float) -> None:
+        self.r.zadd(self.RECOMMENDED_KEY, {post_id: score})
+        self.r.zremrangebyrank(self.RECOMMENDED_KEY, 0, -(settings.RECOMMENDED_TIMELINE_MAX_SIZE + 1))
+
+    def get_recommended(self, offset: int = 0, limit: int = 30) -> list[str]:
+        return self.r.zrevrange(self.RECOMMENDED_KEY, offset, offset + limit - 1)
+
+    def update_score_recommended(self, post_id: str, score: float) -> None:
+        self.r.zadd(self.RECOMMENDED_KEY, {post_id: score})
+        self.r.zremrangebyrank(self.RECOMMENDED_KEY, 0, -(settings.RECOMMENDED_TIMELINE_MAX_SIZE + 1))
 
 
 class PgAuthorSnapshotRepository(AuthorSnapshotRepository):

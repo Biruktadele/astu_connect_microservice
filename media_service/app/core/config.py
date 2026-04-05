@@ -16,6 +16,11 @@ class Settings(BaseSettings):
     JWT_SECRET_KEY: str = "change-me"
     JWT_ALGORITHM: str = "HS256"
 
+    CONTENT_MODERATION_ENABLED: bool = True
+    NSFW_THRESHOLD: float = 0.6
+
+    FEED_REDIS_URL: str = "redis://redis-feed:6379/0"
+
     # Cloudinary: JSON array of {"cloud_name", "api_key", "api_secret"} for multi-cloud rotation
     CLOUDINARY_CLOUDS_JSON: str = ""
 

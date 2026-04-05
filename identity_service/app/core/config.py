@@ -10,7 +10,7 @@ class Settings(BaseSettings):
 
     JWT_SECRET_KEY: str = "change-me"
     JWT_ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
+    ACCESS_TOKEN_EXPIRE_DAYS: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 30
 
     # Email (SMTP) — for verification link and forgot-password OTP
@@ -35,6 +35,8 @@ class Settings(BaseSettings):
 
     # Require email_verified for login (default True)
     REQUIRE_EMAIL_VERIFICATION: bool = True
+
+    INITIAL_ADMIN_EMAIL: str = ""
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
