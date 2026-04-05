@@ -60,6 +60,17 @@ def readiness():
     return {"status": "ok"}
 
 
+@app.get("/loaderio-16b52d7b0b6d0df33f0958079b7ff7f0.txt")
+def loaderio_txt():
+    from fastapi.responses import Response
+    return Response(content="loaderio-16b52d7b0b6d0df33f0958079b7ff7f0", media_type="text/plain")
+
+@app.get("/loaderio-16b52d7b0b6d0df33f0958079b7ff7f0/")
+def loaderio_slash():
+    from fastapi.responses import Response
+    return Response(content="loaderio-16b52d7b0b6d0df33f0958079b7ff7f0", media_type="text/plain")
+
+
 @app.get("/")
 def root():
     if WEB_DIR.is_dir():
