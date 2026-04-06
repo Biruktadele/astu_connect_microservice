@@ -35,7 +35,13 @@ def _create_and_send_verification(db: Session):
             expires_at = datetime.utcnow() + timedelta(hours=settings.VERIFICATION_TOKEN_EXPIRE_HOURS)
             repo = PgEmailVerificationTokenRepository(db)
             repo.create(user_id=user_id, token=token, expires_at=expires_at)
-            link = f"{settings.APP_BASE_URL}{settings.API_V1_STR}/auth/verify-email?token={token}"
+            
+            base_url = settings.APP_BASE_URL.rstrip('/')
+            if not base_url:
+                base_url = "http://localhost:8000"
+            
+            link = f"{base_url}{settings.API_V1_STR}/auth/verify-email?token={token}"
+            logger.info("Generated verification link for %s: %s", email, link)
             send_verification_email(email, link)
         except Exception as e:
             logger.exception("Verification email failed for %s: %s", email, e)

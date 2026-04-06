@@ -1,3 +1,5 @@
+from typing import Any
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -23,7 +25,19 @@ class Settings(BaseSettings):
     SMTP_USE_TLS: bool = True
 
     # App URL for verification link (no trailing slash)
-    APP_BASE_URL: str = ""
+    # This should be the public URL of the API Gateway (e.g. http://13.63.134.156)
+    APP_BASE_URL: str = "http://localhost:8000"
+    
+    @field_validator("APP_BASE_URL", mode="before")
+    @classmethod
+    def validate_app_base_url(cls, v: Any) -> str:
+        if not v or not str(v).strip():
+            return "http://localhost:8000"
+        val = str(v).strip()
+        # Remove trailing slash if present
+        if val.endswith("/"):
+            val = val[:-1]
+        return val
     VERIFY_EMAIL_PATH: str = "/verify-email"
 
     # Email verification token expiry (hours)
