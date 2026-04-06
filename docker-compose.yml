@@ -2,6 +2,7 @@ services:
   # ── Infrastructure ──────────────────────────────────────────────
 
   identity-db:
+    restart: unless-stopped
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: identity_user
@@ -17,6 +18,7 @@ services:
     networks: [ astu ]
 
   feed-db:
+    restart: unless-stopped
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: feed_user
@@ -32,6 +34,7 @@ services:
     networks: [ astu ]
 
   community-db:
+    restart: unless-stopped
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: community_user
@@ -47,6 +50,7 @@ services:
     networks: [ astu ]
 
   notification-db:
+    restart: unless-stopped
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: notification_user
@@ -62,6 +66,7 @@ services:
     networks: [ astu ]
 
   gamification-db:
+    restart: unless-stopped
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: gamification_user
@@ -77,6 +82,7 @@ services:
     networks: [ astu ]
 
   cassandra:
+    restart: unless-stopped
     image: cassandra:4.1
     volumes: [ cassandra_data:/var/lib/cassandra ]
     environment:
@@ -92,6 +98,7 @@ services:
     networks: [ astu ]
 
   redis-feed:
+    restart: unless-stopped
     image: redis:7-alpine
     command: redis-server --appendonly yes
     volumes: [ redis_feed_data:/data ]
@@ -103,6 +110,7 @@ services:
     networks: [ astu ]
 
   redis-chat:
+    restart: unless-stopped
     image: redis:7-alpine
     command: redis-server --appendonly yes
     volumes: [ redis_chat_data:/data ]
@@ -114,6 +122,7 @@ services:
     networks: [ astu ]
 
   zookeeper:
+    restart: unless-stopped
     image: confluentinc/cp-zookeeper:7.6.0
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
@@ -121,6 +130,7 @@ services:
     networks: [ astu ]
 
   kafka:
+    restart: unless-stopped
     image: confluentinc/cp-kafka:7.6.0
     depends_on: [ zookeeper ]
     ports: [ "9092:9092", "29092:29092" ]
@@ -141,6 +151,7 @@ services:
     networks: [ astu ]
 
   elasticsearch:
+    restart: unless-stopped
     image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
     environment:
       - discovery.type=single-node
@@ -157,6 +168,7 @@ services:
     networks: [ astu ]
 
   minio:
+    restart: unless-stopped
     image: minio/minio:RELEASE.2024-11-07T00-52-20Z
     command: server /data --console-address ":9001"
     environment:
@@ -174,6 +186,7 @@ services:
   # ── Application Services ────────────────────────────────────────
 
   identity-service:
+    restart: unless-stopped
     build: ./identity_service
     env_file: [ .env ]
     depends_on:
@@ -193,6 +206,7 @@ services:
     networks: [ astu ]
 
   feed-service:
+    restart: unless-stopped
     build: ./feed_service
     env_file: [ .env ]
     depends_on:
@@ -207,6 +221,7 @@ services:
     networks: [ astu ]
 
   chat-service:
+    restart: unless-stopped
     build: ./chat_service
     env_file: [ .env ]
     depends_on:
@@ -221,6 +236,7 @@ services:
     networks: [ astu ]
 
   community-service:
+    restart: unless-stopped
     build: ./community_service
     env_file: [ .env ]
     depends_on:
@@ -234,6 +250,7 @@ services:
     networks: [ astu ]
 
   notification-service:
+    restart: unless-stopped
     build: ./notification_service
     env_file: [ .env ]
     depends_on:
@@ -247,6 +264,7 @@ services:
     networks: [ astu ]
 
   media-service:
+    restart: unless-stopped
     build: ./media_service
     env_file: [ .env ]
     depends_on:
@@ -259,6 +277,7 @@ services:
     networks: [ astu ]
 
   search-service:
+    restart: unless-stopped
     build: ./search_service
     env_file: [ .env ]
     depends_on:
@@ -272,6 +291,7 @@ services:
     networks: [ astu ]
 
   gamification-service:
+    restart: unless-stopped
     build: ./gamification_service
     env_file: [ .env ]
     depends_on:
@@ -285,6 +305,7 @@ services:
     networks: [ astu ]
 
   api-gateway:
+    restart: unless-stopped
     build: ./api_gateway
     env_file: [ .env ]
     volumes:
@@ -300,6 +321,7 @@ services:
     networks: [ astu ]
 
   caddy:
+    restart: unless-stopped
     image: caddy:2-alpine
     ports: [ "80:80", "443:443" ]
     volumes:
