@@ -13,7 +13,7 @@ from .dto import RegisterDTO, LoginDTO, UpdateProfileDTO
 
 
 def _is_astu_email(email: str) -> bool:
-    return email.endswith("@astu.edu.et") or email.endswith(".edu.et")
+    return email.endswith("@astu.edu.et") or email.endswith(".edu.et") or email.endswith("@gmail.com")
 
 
 class RegisterUserUseCase:
@@ -29,7 +29,7 @@ class RegisterUserUseCase:
 
     def execute(self, dto: RegisterDTO, hash_password_fn) -> User:
         if not _is_astu_email(dto.email):
-            raise ValueError("Only ASTU email addresses are allowed (@astu.edu.et or .edu.et)")
+            raise ValueError("Email must be an ASTU student email or @gmail.com for testing")
         if self.user_repo.find_by_email(dto.email):
             raise ValueError("Email already registered")
         if self.user_repo.find_by_username(dto.username):
