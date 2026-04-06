@@ -20,13 +20,13 @@ class Settings(BaseSettings):
     SMTP_PORT: int = 587
     SMTP_USER: str = ""
     SMTP_PASSWORD: str = ""
-    SMTP_FROM_EMAIL: str = "noreply@astu.edu.et"
+    SMTP_FROM_EMAIL: str = "[EMAIL_ADDRESS]"
     SMTP_FROM_NAME: str = "ASTU Connect"
     SMTP_USE_TLS: bool = True
 
     # App URL for verification link (no trailing slash)
     # This should be the public URL of the API Gateway (e.g. http://13.63.134.156)
-    APP_BASE_URL: str = "http://localhost:8000"
+    APP_BASE_URL: str = "http://13.63.134.156"
     
     @field_validator("APP_BASE_URL", mode="before")
     @classmethod
