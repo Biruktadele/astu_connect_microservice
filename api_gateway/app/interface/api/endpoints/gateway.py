@@ -25,7 +25,15 @@ ROUTE_MAP = {
     "/api/v1/gamification": settings.GAMIFICATION_SERVICE_URL,
 }
 
-PUBLIC_PREFIXES = {"/api/v1/auth/login", "/api/v1/auth/register", "/api/v1/auth/refresh"}
+PUBLIC_PREFIXES = {
+    "/api/v1/auth/login",
+    "/api/v1/auth/register",
+    "/api/v1/auth/refresh",
+    "/api/v1/auth/resend-verification",
+    "/api/v1/auth/verify-email",
+    "/api/v1/auth/forgot-password",
+    "/api/v1/auth/reset-password",
+}
 
 ADMIN_PREFIXES = {"/api/v1/admin", "/api/v1/feed/admin", "/api/v1/communities/admin"}
 
