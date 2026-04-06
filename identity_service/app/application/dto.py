@@ -37,6 +37,10 @@ class ResetPasswordDTO(BaseModel):
     new_password: str
 
 
+class ResendVerificationDTO(BaseModel):
+    email: EmailStr
+
+
 class UserResponse(BaseModel):
     id: str
     email: str

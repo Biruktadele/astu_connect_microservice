@@ -3,6 +3,7 @@ import secrets
 from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
 
 from ....infrastructure.database import get_db
@@ -18,7 +19,7 @@ from ....application.use_cases import (
 )
 from ....application.dto import (
     RegisterDTO, LoginDTO, RefreshDTO, TokenResponse, UserResponse,
-    ForgotPasswordDTO, ResetPasswordDTO,
+    ForgotPasswordDTO, ResetPasswordDTO, ResendVerificationDTO,
 )
 from ....core.config import settings
 
@@ -68,7 +69,7 @@ def register(dto: RegisterDTO, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/verify-email")
+@router.get("/verify-email", response_class=HTMLResponse)
 def verify_email(token: str = Query(...), db: Session = Depends(get_db)):
     uc = VerifyEmailUseCase(
         PgUserRepository(db),
@@ -77,10 +78,54 @@ def verify_email(token: str = Query(...), db: Session = Depends(get_db)):
     try:
         uc.execute(token)
         db.commit()
-        return {"message": "Email verified successfully"}
+        return """
+        <html>
+            <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+                <h1 style="color: #4CAF50;">✓ Email Verified!</h1>
+                <p>Your email has been successfully verified.</p>
+                <p>You can now close this browser window and log into ASTU Connect on your phone.</p>
+            </body>
+        </html>
+        """
     except ValueError as e:
         db.rollback()
-        raise HTTPException(status_code=400, detail=str(e))
+        return f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+                <h1 style="color: #f44336;">✗ Verification Failed</h1>
+                <p>{str(e)}</p>
+                <p>Please try registering again or contact support.</p>
+            </body>
+        </html>
+        """
+
+
+@router.post("/resend-verification")
+def resend_verification(dto: ResendVerificationDTO, db: Session = Depends(get_db)):
+    """Re-send the email verification link.
+
+    Always returns 200 to avoid leaking whether an email is registered.
+    Returns 400 only when the email is already verified.
+    """
+    repo = PgEmailVerificationTokenRepository(db)
+    user_repo = PgUserRepository(db)
+
+    user = user_repo.find_by_email(dto.email)
+    if not user:
+        # Do not reveal whether the email is registered
+        return {"message": "If that email is registered and unverified, a new link has been sent"}
+    if user.email_verified:
+        raise HTTPException(status_code=400, detail="Email is already verified")
+
+    # Invalidate any existing tokens then issue a fresh one
+    try:
+        repo.delete_by_user_id(user.id)
+    except Exception:
+        pass  # Deletion is best-effort; proceed regardless
+
+    _create_and_send_verification(db)(user.id, user.email)
+    db.commit()
+    return {"message": "If that email is registered and unverified, a new link has been sent"}
 
 
 @router.post("/login", response_model=TokenResponse)

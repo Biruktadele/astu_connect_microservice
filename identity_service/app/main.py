@@ -47,7 +47,13 @@ async def lifespan(app: FastAPI):
     relay_task.cancel()
 
 
-app = FastAPI(title=settings.PROJECT_NAME, lifespan=lifespan)
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    lifespan=lifespan,
+    docs_url=None if settings.PRODUCTION else "/docs",
+    redoc_url=None if settings.PRODUCTION else "/redoc",
+    openapi_url=None if settings.PRODUCTION else "/openapi.json",
+)
 
 app.include_router(auth.router, prefix=settings.API_V1_STR)
 app.include_router(users.router, prefix=settings.API_V1_STR)

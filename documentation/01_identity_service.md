@@ -2,6 +2,8 @@
 
 **Base path:** `/api/v1/auth`, `/api/v1/users`
 
+> Replace `{{BASE_URL}}` with your actual host (see [documentation/README.md](./README.md)).
+
 ---
 
 ## Authentication Endpoints
@@ -23,7 +25,7 @@ Register a new ASTU student account. Email must end in `@astu.edu.et` or `.edu.e
 
 **cURL:**
 ```bash
-curl -X POST http://16.171.11.166/api/v1/auth/register \
+curl -X POST {{BASE_URL}}/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "email": "student@astu.edu.et",
@@ -69,7 +71,7 @@ Verify email address using the token sent to the user's email.
 
 **cURL:**
 ```bash
-curl "http://16.171.11.166/api/v1/auth/verify-email?token=abc123xyz"
+curl "{{BASE_URL}}/api/v1/auth/verify-email?token=abc123xyz"
 ```
 
 **Response 200 OK:**
@@ -80,6 +82,33 @@ curl "http://16.171.11.166/api/v1/auth/verify-email?token=abc123xyz"
 **Response 400 Bad Request:**
 ```json
 {"detail": "Invalid or expired token"}
+```
+
+---
+
+### POST /api/v1/auth/resend-verification
+Re-send the email verification link. Safe against email enumeration — always returns `200` for unknown emails.
+
+**Request body:**
+```json
+{"email": "student@astu.edu.et"}
+```
+
+**cURL:**
+```bash
+curl -X POST {{BASE_URL}}/api/v1/auth/resend-verification \
+  -H "Content-Type: application/json" \
+  -d '{"email": "student@astu.edu.et"}'
+```
+
+**Response 200 OK (email sent or address not found — same response to avoid enumeration):**
+```json
+{"message": "If that email is registered and unverified, a new link has been sent"}
+```
+
+**Response 400 Bad Request (already verified):**
+```json
+{"detail": "Email is already verified"}
 ```
 
 ---
@@ -97,7 +126,7 @@ Login and receive access + refresh tokens.
 
 **cURL:**
 ```bash
-curl -X POST http://16.171.11.166/api/v1/auth/login \
+curl -X POST {{BASE_URL}}/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email": "student@astu.edu.et", "password": "SecurePassword123!"}'
 ```
@@ -135,7 +164,7 @@ Get a new access token using your refresh token.
 
 **cURL:**
 ```bash
-curl -X POST http://16.171.11.166/api/v1/auth/refresh \
+curl -X POST {{BASE_URL}}/api/v1/auth/refresh \
   -H "Content-Type: application/json" \
   -d '{"refresh_token": "dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4..."}'
 ```
@@ -161,7 +190,7 @@ Request a password reset OTP sent to the email.
 
 **cURL:**
 ```bash
-curl -X POST http://16.171.11.166/api/v1/auth/forgot-password \
+curl -X POST {{BASE_URL}}/api/v1/auth/forgot-password \
   -H "Content-Type: application/json" \
   -d '{"email": "student@astu.edu.et"}'
 ```
@@ -187,7 +216,7 @@ Reset password using the OTP code received by email.
 
 **cURL:**
 ```bash
-curl -X POST http://16.171.11.166/api/v1/auth/reset-password \
+curl -X POST {{BASE_URL}}/api/v1/auth/reset-password \
   -H "Content-Type: application/json" \
   -d '{"email": "student@astu.edu.et", "otp": "123456", "new_password": "NewSecurePassword123!"}'
 ```
@@ -213,7 +242,7 @@ Get the currently authenticated user's profile.
 
 **cURL:**
 ```bash
-curl http://16.171.11.166/api/v1/users/me \
+curl {{BASE_URL}}/api/v1/users/me \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -255,7 +284,7 @@ Update the current user's profile fields (partial update — only include fields
 
 **cURL:**
 ```bash
-curl -X PATCH http://16.171.11.166/api/v1/users/me \
+curl -X PATCH {{BASE_URL}}/api/v1/users/me \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{"bio": "Final year CS student"}'
@@ -270,7 +299,7 @@ Get any user's public profile.
 
 **cURL:**
 ```bash
-curl http://16.171.11.166/api/v1/users/3fa85f64-5717-4562-b3fc-2c963f66afa6 \
+curl {{BASE_URL}}/api/v1/users/3fa85f64-5717-4562-b3fc-2c963f66afa6 \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -290,7 +319,7 @@ List all followers of a user.
 
 **cURL:**
 ```bash
-curl "http://16.171.11.166/api/v1/users/3fa85f64.../followers?limit=20&offset=0" \
+curl "{{BASE_URL}}/api/v1/users/3fa85f64.../followers?limit=20&offset=0" \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -320,7 +349,7 @@ List all users that a user is following.
 
 **cURL:**
 ```bash
-curl "http://16.171.11.166/api/v1/users/3fa85f64.../following?limit=20" \
+curl "{{BASE_URL}}/api/v1/users/3fa85f64.../following?limit=20" \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -335,7 +364,7 @@ Follow a user.
 
 **cURL:**
 ```bash
-curl -X POST http://16.171.11.166/api/v1/users/3fa85f64.../follow \
+curl -X POST {{BASE_URL}}/api/v1/users/3fa85f64.../follow \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -356,7 +385,7 @@ Unfollow a user.
 
 **cURL:**
 ```bash
-curl -X DELETE http://16.171.11.166/api/v1/users/3fa85f64.../follow \
+curl -X DELETE {{BASE_URL}}/api/v1/users/3fa85f64.../follow \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -369,7 +398,7 @@ Block a user (also removes follow relationship).
 
 **cURL:**
 ```bash
-curl -X POST http://16.171.11.166/api/v1/users/3fa85f64.../block \
+curl -X POST {{BASE_URL}}/api/v1/users/3fa85f64.../block \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -385,7 +414,7 @@ Unblock a user.
 
 **cURL:**
 ```bash
-curl -X DELETE http://16.171.11.166/api/v1/users/3fa85f64.../block \
+curl -X DELETE {{BASE_URL}}/api/v1/users/3fa85f64.../block \
   -H "Authorization: Bearer <token>"
 ```
 

@@ -213,6 +213,13 @@ class PgEmailVerificationTokenRepository:
         ).update({"used_at": datetime.utcnow()})
         self.db.flush()
 
+    def delete_by_user_id(self, user_id: str) -> None:
+        """Hard-delete all verification tokens for a user (used before re-issuing)."""
+        self.db.query(EmailVerificationTokenModel).filter(
+            EmailVerificationTokenModel.user_id == user_id,
+        ).delete()
+        self.db.flush()
+
 
 class PgPasswordResetOtpRepository:
     """Create and consume password reset OTPs (infra-only)."""

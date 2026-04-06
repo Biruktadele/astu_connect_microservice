@@ -38,6 +38,9 @@ class Settings(BaseSettings):
 
     INITIAL_ADMIN_EMAIL: str = ""
 
+    # Set to true in production to hide /docs, /redoc, /openapi.json
+    PRODUCTION: bool = False
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 

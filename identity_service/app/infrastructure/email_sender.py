@@ -21,24 +21,44 @@ def send_verification_email(to_email: str, verification_link: str) -> None:
         return
 
     subject = "Verify your email — ASTU Connect"
-    body = f"""Hello,
+    body_text = f"""Hello,
 
-Please verify your email by clicking the link below:
+Please verify your email address to complete your registration with ASTU Connect:
 
 {verification_link}
 
-This link expires in {settings.VERIFICATION_TOKEN_EXPIRE_HOURS} hours.
+This verification link will expire in {settings.VERIFICATION_TOKEN_EXPIRE_HOURS} hours.
 
-If you did not create an account, you can ignore this email.
+If you did not request this, you can safely ignore this email.
 
-— {settings.SMTP_FROM_NAME}
+Best regards,
+The {settings.SMTP_FROM_NAME} Team
 """
+
+    body_html = f"""
+    <html>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+        <p>Hello,</p>
+        <p>Please verify your email address to complete your registration with ASTU Connect.</p>
+        <p>
+            <a href="{verification_link}" style="display: inline-block; padding: 10px 20px; font-size: 16px; color: #fff; background-color: #4CAF50; text-decoration: none; border-radius: 5px;">Verify Email</a>
+        </p>
+        <p>If the button doesn't work, <a href="{verification_link}" style="color: #4CAF50; text-decoration: underline;">click here</a>.</p>
+        <p>This verification link will expire in {settings.VERIFICATION_TOKEN_EXPIRE_HOURS} hours.</p>
+        <p>If you did not request this, you can safely ignore this email.</p>
+        <p>Best regards,<br>The {settings.SMTP_FROM_NAME} Team</p>
+      </body>
+    </html>
+    """
 
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
     msg["From"] = f"{settings.SMTP_FROM_NAME} <{settings.SMTP_FROM_EMAIL}>"
     msg["To"] = to_email
-    msg.attach(MIMEText(body, "plain"))
+    
+    # Attach plain text first, then HTML (email clients prefer the last attached part they can render)
+    msg.attach(MIMEText(body_text, "plain"))
+    msg.attach(MIMEText(body_html, "html"))
 
     try:
         with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as server:

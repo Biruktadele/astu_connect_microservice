@@ -1,8 +1,15 @@
 # ASTU Connect — API Documentation
 
-**Base URL (Production):** `http://16.171.11.166`
+**Base URL:** Configured via the `APP_BASE_URL` environment variable in `.env`.
 
-All requests to protected endpoints require a Bearer JWT token obtained from `/api/v1/auth/login`.
+> All example cURL commands use `{{BASE_URL}}` as a placeholder. Replace it with your actual host, e.g.:
+> - **Production:** `http://16.171.11.166`
+> - **Local dev:** `http://localhost:8000`
+>
+> Example: `curl {{BASE_URL}}/api/v1/auth/login`
+
+All requests to protected endpoints require a Bearer JWT token obtained from `{{BASE_URL}}/api/v1/auth/login`.
+
 
 ---
 
