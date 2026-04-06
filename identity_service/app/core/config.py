@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     SMTP_USE_TLS: bool = True
 
     # App URL for verification link (no trailing slash)
-    APP_BASE_URL: str = "http://localhost:8000"
+    APP_BASE_URL: str = ""
     VERIFY_EMAIL_PATH: str = "/verify-email"
 
     # Email verification token expiry (hours)

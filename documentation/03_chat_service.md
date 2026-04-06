@@ -1,6 +1,6 @@
 # Chat Service — API Documentation
 
-**Base path:** `/api/v1/chat`, WebSocket: `ws://16.171.11.166/ws/chat`
+**Base path:** `/api/v1/chat`, WebSocket: `ws://{{BASE_URL}}/ws/chat`
 
 > All HTTP endpoints require `Authorization: Bearer <token>`
 
@@ -20,7 +20,7 @@ Start or retrieve a one-on-one Direct Message conversation with another user.
 
 **cURL:**
 ```bash
-curl -X POST http://16.171.11.166/api/v1/chat/conversations/dm \
+curl -X POST {{BASE_URL}}/api/v1/chat/conversations/dm \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{"other_user_id": "target-user-uuid"}'
@@ -57,7 +57,7 @@ Create a new group conversation.
 
 **cURL:**
 ```bash
-curl -X POST http://16.171.11.166/api/v1/chat/conversations/group \
+curl -X POST {{BASE_URL}}/api/v1/chat/conversations/group \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{"name": "CS Study Group", "participant_ids": ["user-uuid-2", "user-uuid-3"]}'
@@ -81,7 +81,7 @@ List all conversations for the current user.
 
 **cURL:**
 ```bash
-curl http://16.171.11.166/api/v1/chat/conversations \
+curl {{BASE_URL}}/api/v1/chat/conversations \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -114,7 +114,7 @@ Send a message to a conversation (REST fallback — prefer WebSocket for real-ti
 
 **cURL:**
 ```bash
-curl -X POST http://16.171.11.166/api/v1/chat/conversations/conversation-uuid/messages \
+curl -X POST {{BASE_URL}}/api/v1/chat/conversations/conversation-uuid/messages \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{"body": "Hey! How are you?", "client_msg_id": "msg-001"}'
@@ -142,7 +142,7 @@ Get message history for a conversation (paginated, newest first).
 
 **cURL:**
 ```bash
-curl "http://16.171.11.166/api/v1/chat/conversations/conversation-uuid/messages?limit=20" \
+curl "{{BASE_URL}}/api/v1/chat/conversations/conversation-uuid/messages?limit=20" \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -169,7 +169,7 @@ The WebSocket allows real-time bidirectional messaging.
 
 **Connection URL:**
 ```
-ws://16.171.11.166/ws/chat?token=<your_access_token>
+ws://{{BASE_URL}}/ws/chat?token=<your_access_token>
 ```
 
 ---

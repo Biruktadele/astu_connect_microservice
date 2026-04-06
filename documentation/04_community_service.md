@@ -15,7 +15,7 @@ List all communities (optionally search by name).
 
 **cURL:**
 ```bash
-curl "http://16.171.11.166/api/v1/communities?q=robotics&limit=10" \
+curl "{{BASE_URL}}/api/v1/communities?q=robotics&limit=10" \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -59,7 +59,7 @@ Create a new community.
 
 **cURL:**
 ```bash
-curl -X POST http://16.171.11.166/api/v1/communities \
+curl -X POST {{BASE_URL}}/api/v1/communities \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{"name": "ASTU Robotics Club", "slug": "astu-robotics", "description": "For all robotics enthusiasts at ASTU", "visibility": "public"}'
@@ -90,7 +90,7 @@ Get a single community by ID.
 
 **cURL:**
 ```bash
-curl http://16.171.11.166/api/v1/communities/community-uuid \
+curl {{BASE_URL}}/api/v1/communities/community-uuid \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -118,7 +118,7 @@ Update a community (only owners or admins of the community can do this).
 
 **cURL:**
 ```bash
-curl -X PATCH http://16.171.11.166/api/v1/communities/community-uuid \
+curl -X PATCH {{BASE_URL}}/api/v1/communities/community-uuid \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{"description": "Updated description"}'
@@ -138,7 +138,7 @@ Join a community.
 
 **cURL:**
 ```bash
-curl -X POST http://16.171.11.166/api/v1/communities/community-uuid/join \
+curl -X POST {{BASE_URL}}/api/v1/communities/community-uuid/join \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -154,7 +154,7 @@ Leave a community.
 
 **cURL:**
 ```bash
-curl -X POST http://16.171.11.166/api/v1/communities/community-uuid/leave \
+curl -X POST {{BASE_URL}}/api/v1/communities/community-uuid/leave \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -171,7 +171,7 @@ List all members of a community.
 
 **cURL:**
 ```bash
-curl "http://16.171.11.166/api/v1/communities/community-uuid/members?limit=20" \
+curl "{{BASE_URL}}/api/v1/communities/community-uuid/members?limit=20" \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -202,7 +202,7 @@ Change a member's role (only owners and admins can do this).
 
 **cURL:**
 ```bash
-curl -X PUT http://16.171.11.166/api/v1/communities/community-uuid/members/user-uuid/role \
+curl -X PUT {{BASE_URL}}/api/v1/communities/community-uuid/members/user-uuid/role \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{"role": "admin"}'
@@ -224,7 +224,7 @@ List posts within a community.
 
 **cURL:**
 ```bash
-curl "http://16.171.11.166/api/v1/communities/community-uuid/posts?limit=10" \
+curl "{{BASE_URL}}/api/v1/communities/community-uuid/posts?limit=10" \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -259,7 +259,7 @@ Create a post inside a community (you must be a member).
 
 **cURL:**
 ```bash
-curl -X POST http://16.171.11.166/api/v1/communities/community-uuid/posts \
+curl -X POST {{BASE_URL}}/api/v1/communities/community-uuid/posts \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{"title": "Event Announcement", "body": "Hackathon next week!"}'
@@ -274,7 +274,7 @@ Delete a community post (owner/admin can delete any post; members can only delet
 
 **cURL:**
 ```bash
-curl -X DELETE http://16.171.11.166/api/v1/communities/community-uuid/posts/post-uuid \
+curl -X DELETE {{BASE_URL}}/api/v1/communities/community-uuid/posts/post-uuid \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -290,11 +290,11 @@ Pin or unpin a community post (admins/owners only).
 **cURL:**
 ```bash
 # Pin a post
-curl -X PATCH "http://16.171.11.166/api/v1/communities/community-uuid/posts/post-uuid/pin?pinned=true" \
+curl -X PATCH "{{BASE_URL}}/api/v1/communities/community-uuid/posts/post-uuid/pin?pinned=true" \
   -H "Authorization: Bearer <token>"
 
 # Unpin a post
-curl -X PATCH "http://16.171.11.166/api/v1/communities/community-uuid/posts/post-uuid/pin?pinned=false" \
+curl -X PATCH "{{BASE_URL}}/api/v1/communities/community-uuid/posts/post-uuid/pin?pinned=false" \
   -H "Authorization: Bearer <token>"
 ```
 

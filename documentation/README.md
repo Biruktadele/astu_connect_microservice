@@ -3,8 +3,8 @@
 **Base URL:** Configured via the `APP_BASE_URL` environment variable in `.env`.
 
 > All example cURL commands use `{{BASE_URL}}` as a placeholder. Replace it with your actual host, e.g.:
-> - **Production:** `http://16.171.11.166`
-> - **Local dev:** `http://localhost:8000`
+> - **Production:** `http://13.63.134.156`
+> - **Local dev:** `http://13.63.134.156`
 >
 > Example: `curl {{BASE_URL}}/api/v1/auth/login`
 

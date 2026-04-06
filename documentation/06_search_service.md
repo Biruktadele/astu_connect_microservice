@@ -22,15 +22,15 @@ Search across all content types (users, posts, and communities) at once.
 **cURL:**
 ```bash
 # Search everything
-curl "http://16.171.11.166/api/v1/search?q=robotics&limit=10" \
+curl "{{BASE_URL}}/api/v1/search?q=robotics&limit=10" \
   -H "Authorization: Bearer <token>"
 
 # Search only users
-curl "http://16.171.11.166/api/v1/search?q=biruk&type=user&limit=10" \
+curl "{{BASE_URL}}/api/v1/search?q=biruk&type=user&limit=10" \
   -H "Authorization: Bearer <token>"
 
 # Search only posts
-curl "http://16.171.11.166/api/v1/search?q=hackathon&type=post&limit=20" \
+curl "{{BASE_URL}}/api/v1/search?q=hackathon&type=post&limit=20" \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -81,7 +81,7 @@ Shortcut to search only users.
 
 **cURL:**
 ```bash
-curl "http://16.171.11.166/api/v1/search/users?q=samrawit&limit=10" \
+curl "{{BASE_URL}}/api/v1/search/users?q=samrawit&limit=10" \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -114,7 +114,7 @@ Shortcut to search only posts.
 
 **cURL:**
 ```bash
-curl "http://16.171.11.166/api/v1/search/posts?q=exam+tips&limit=10" \
+curl "{{BASE_URL}}/api/v1/search/posts?q=exam+tips&limit=10" \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -145,7 +145,7 @@ Shortcut to search only communities.
 
 **cURL:**
 ```bash
-curl "http://16.171.11.166/api/v1/search/communities?q=coding+club&limit=10" \
+curl "{{BASE_URL}}/api/v1/search/communities?q=coding+club&limit=10" \
   -H "Authorization: Bearer <token>"
 ```
 

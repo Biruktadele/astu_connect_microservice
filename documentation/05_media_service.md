@@ -27,17 +27,17 @@ Upload an image or video file. The file is automatically compressed and scanned 
 **cURL:**
 ```bash
 # Upload an image for a post
-curl -X POST "http://16.171.11.166/api/v1/media/upload?purpose=post" \
+curl -X POST "{{BASE_URL}}/api/v1/media/upload?purpose=post" \
   -H "Authorization: Bearer <token>" \
   -F "file=@/path/to/your/image.jpg"
 
 # Upload an avatar image
-curl -X POST "http://16.171.11.166/api/v1/media/upload?purpose=avatar" \
+curl -X POST "{{BASE_URL}}/api/v1/media/upload?purpose=avatar" \
   -H "Authorization: Bearer <token>" \
   -F "file=@/path/to/avatar.png"
 
 # Upload a video
-curl -X POST "http://16.171.11.166/api/v1/media/upload?purpose=post" \
+curl -X POST "{{BASE_URL}}/api/v1/media/upload?purpose=post" \
   -H "Authorization: Bearer <token>" \
   -F "file=@/path/to/video.mp4"
 ```
@@ -100,7 +100,7 @@ Generates a pre-signed URL for directly uploading a file to MinIO S3-compatible 
 
 **cURL:**
 ```bash
-curl -X POST http://16.171.11.166/api/v1/media/upload-url \
+curl -X POST {{BASE_URL}}/api/v1/media/upload-url \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{"filename": "profile_photo.jpg", "content_type": "image/jpeg", "purpose": "avatar"}'
@@ -130,13 +130,13 @@ Get a download URL for a stored object. Accepts both Cloudinary URLs (returned a
 **cURL:**
 ```bash
 # MinIO object name
-curl -X POST http://16.171.11.166/api/v1/media/download-url \
+curl -X POST {{BASE_URL}}/api/v1/media/download-url \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{"object_name": "avatar/user-uuid/550e8400.jpg"}'
 
 # Full Cloudinary URL (returned unchanged)
-curl -X POST http://16.171.11.166/api/v1/media/download-url \
+curl -X POST {{BASE_URL}}/api/v1/media/download-url \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{"object_name": "https://res.cloudinary.com/.../image.jpg"}'
@@ -160,11 +160,11 @@ Delete a media file. Users can only delete their own files.
 **cURL:**
 ```bash
 # Delete a Cloudinary file (URL-encode the path)
-curl -X DELETE "http://16.171.11.166/api/v1/media/https%3A%2F%2Fres.cloudinary.com%2F.../image.jpg" \
+curl -X DELETE "{{BASE_URL}}/api/v1/media/https%3A%2F%2Fres.cloudinary.com%2F.../image.jpg" \
   -H "Authorization: Bearer <token>"
 
 # Delete a MinIO object
-curl -X DELETE "http://16.171.11.166/api/v1/media/avatar/user-uuid/550e8400.jpg" \
+curl -X DELETE "{{BASE_URL}}/api/v1/media/avatar/user-uuid/550e8400.jpg" \
   -H "Authorization: Bearer <token>"
 ```
 

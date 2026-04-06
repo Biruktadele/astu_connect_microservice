@@ -21,11 +21,11 @@ List all notifications for the current user.
 **cURL:**
 ```bash
 # All notifications
-curl "http://16.171.11.166/api/v1/notifications?limit=20" \
+curl "{{BASE_URL}}/api/v1/notifications?limit=20" \
   -H "Authorization: Bearer <token>"
 
 # Only unread notifications
-curl "http://16.171.11.166/api/v1/notifications?unread_only=true" \
+curl "{{BASE_URL}}/api/v1/notifications?unread_only=true" \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -66,7 +66,7 @@ Get the count of unread notifications (for showing a badge in the UI).
 
 **cURL:**
 ```bash
-curl http://16.171.11.166/api/v1/notifications/unread-count \
+curl {{BASE_URL}}/api/v1/notifications/unread-count \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -84,7 +84,7 @@ Mark a single notification as read.
 
 **cURL:**
 ```bash
-curl -X POST http://16.171.11.166/api/v1/notifications/notif-uuid/read \
+curl -X POST {{BASE_URL}}/api/v1/notifications/notif-uuid/read \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -105,7 +105,7 @@ Mark ALL unread notifications as read at once.
 
 **cURL:**
 ```bash
-curl -X POST http://16.171.11.166/api/v1/notifications/read-all \
+curl -X POST {{BASE_URL}}/api/v1/notifications/read-all \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -123,7 +123,7 @@ Get the current user's notification preference settings.
 
 **cURL:**
 ```bash
-curl http://16.171.11.166/api/v1/notifications/preferences \
+curl {{BASE_URL}}/api/v1/notifications/preferences \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -155,13 +155,13 @@ Update notification preferences (partial update — only include fields to chang
 **cURL:**
 ```bash
 # Disable reaction notifications only
-curl -X PUT http://16.171.11.166/api/v1/notifications/preferences \
+curl -X PUT {{BASE_URL}}/api/v1/notifications/preferences \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{"notify_reactions": false}'
 
 # Disable all notifications
-curl -X PUT http://16.171.11.166/api/v1/notifications/preferences \
+curl -X PUT {{BASE_URL}}/api/v1/notifications/preferences \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{"enabled": false}'

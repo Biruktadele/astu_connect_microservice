@@ -29,7 +29,7 @@ Get your own full gamification profile (points, badges, level, stats).
 
 **cURL:**
 ```bash
-curl http://16.171.11.166/api/v1/gamification/me \
+curl {{BASE_URL}}/api/v1/gamification/me \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -69,7 +69,7 @@ Get the gamification profile of any user by their ID.
 
 **cURL:**
 ```bash
-curl http://16.171.11.166/api/v1/gamification/users/user-uuid \
+curl {{BASE_URL}}/api/v1/gamification/users/user-uuid \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -87,11 +87,11 @@ Get the top users by points for the selected time period.
 **cURL:**
 ```bash
 # Weekly leaderboard top 10
-curl "http://16.171.11.166/api/v1/gamification/leaderboard?period=weekly&limit=10" \
+curl "{{BASE_URL}}/api/v1/gamification/leaderboard?period=weekly&limit=10" \
   -H "Authorization: Bearer <token>"
 
 # All-time top 20
-curl "http://16.171.11.166/api/v1/gamification/leaderboard?period=alltime&limit=20" \
+curl "{{BASE_URL}}/api/v1/gamification/leaderboard?period=alltime&limit=20" \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -123,7 +123,7 @@ List all badge types available on the platform (no authentication required).
 
 **cURL:**
 ```bash
-curl http://16.171.11.166/api/v1/gamification/badges
+curl {{BASE_URL}}/api/v1/gamification/badges
 ```
 
 **Response 200 OK:**
@@ -156,7 +156,7 @@ Get your personal point transaction history (what earned you points).
 
 **cURL:**
 ```bash
-curl "http://16.171.11.166/api/v1/gamification/me/transactions?limit=20" \
+curl "{{BASE_URL}}/api/v1/gamification/me/transactions?limit=20" \
   -H "Authorization: Bearer <token>"
 ```
 

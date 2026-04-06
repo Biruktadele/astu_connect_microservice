@@ -21,7 +21,7 @@ List all platform users with optional filters.
 
 **cURL:**
 ```bash
-curl "http://16.171.11.166/api/v1/admin/users?q=biruk&status=active&limit=20" \
+curl "{{BASE_URL}}/api/v1/admin/users?q=biruk&status=active&limit=20" \
   -H "Authorization: Bearer <admin_token>"
 ```
 
@@ -59,7 +59,7 @@ Get full details of a specific user.
 
 **cURL:**
 ```bash
-curl http://16.171.11.166/api/v1/admin/users/user-uuid \
+curl {{BASE_URL}}/api/v1/admin/users/user-uuid \
   -H "Authorization: Bearer <admin_token>"
 ```
 
@@ -82,7 +82,7 @@ Ban a user from the platform (revokes all their sessions immediately).
 
 **cURL:**
 ```bash
-curl -X PUT http://16.171.11.166/api/v1/admin/users/user-uuid/ban \
+curl -X PUT {{BASE_URL}}/api/v1/admin/users/user-uuid/ban \
   -H "Authorization: Bearer <admin_token>" \
   -H "Content-Type: application/json" \
   -d '{"reason": "Violated community guidelines"}'
@@ -105,7 +105,7 @@ Restore a banned user's access to the platform.
 
 **cURL:**
 ```bash
-curl -X PUT http://16.171.11.166/api/v1/admin/users/user-uuid/unban \
+curl -X PUT {{BASE_URL}}/api/v1/admin/users/user-uuid/unban \
   -H "Authorization: Bearer <admin_token>"
 ```
 
@@ -129,13 +129,13 @@ Set the platform roles of a user (completely replaces existing roles).
 **cURL:**
 ```bash
 # Promote to moderator
-curl -X PUT http://16.171.11.166/api/v1/admin/users/user-uuid/roles \
+curl -X PUT {{BASE_URL}}/api/v1/admin/users/user-uuid/roles \
   -H "Authorization: Bearer <admin_token>" \
   -H "Content-Type: application/json" \
   -d '{"roles": ["student", "moderator"]}'
 
 # Promote to admin
-curl -X PUT http://16.171.11.166/api/v1/admin/users/user-uuid/roles \
+curl -X PUT {{BASE_URL}}/api/v1/admin/users/user-uuid/roles \
   -H "Authorization: Bearer <admin_token>" \
   -H "Content-Type: application/json" \
   -d '{"roles": ["admin"]}'
@@ -153,7 +153,7 @@ Get platform-wide user statistics.
 
 **cURL:**
 ```bash
-curl http://16.171.11.166/api/v1/admin/stats \
+curl {{BASE_URL}}/api/v1/admin/stats \
   -H "Authorization: Bearer <admin_token>"
 ```
 
@@ -182,7 +182,7 @@ List all posts with optional moderation status filter.
 **cURL:**
 ```bash
 # See all NSFW-flagged posts
-curl "http://16.171.11.166/api/v1/feed/admin/posts?moderation_status=flagged&limit=20" \
+curl "{{BASE_URL}}/api/v1/feed/admin/posts?moderation_status=flagged&limit=20" \
   -H "Authorization: Bearer <admin_token>"
 ```
 
@@ -216,7 +216,7 @@ Approve a flagged post (marks it as safe to display).
 
 **cURL:**
 ```bash
-curl -X PUT http://16.171.11.166/api/v1/feed/admin/posts/post-uuid/approve \
+curl -X PUT {{BASE_URL}}/api/v1/feed/admin/posts/post-uuid/approve \
   -H "Authorization: Bearer <admin_token>"
 ```
 
@@ -232,7 +232,7 @@ Reject a post and hide it from the feed.
 
 **cURL:**
 ```bash
-curl -X PUT http://16.171.11.166/api/v1/feed/admin/posts/post-uuid/reject \
+curl -X PUT {{BASE_URL}}/api/v1/feed/admin/posts/post-uuid/reject \
   -H "Authorization: Bearer <admin_token>"
 ```
 
@@ -248,7 +248,7 @@ Permanently soft-delete a post from the feed.
 
 **cURL:**
 ```bash
-curl -X DELETE http://16.171.11.166/api/v1/feed/admin/posts/post-uuid \
+curl -X DELETE {{BASE_URL}}/api/v1/feed/admin/posts/post-uuid \
   -H "Authorization: Bearer <admin_token>"
 ```
 
@@ -264,7 +264,7 @@ Get moderation statistics for posts.
 
 **cURL:**
 ```bash
-curl http://16.171.11.166/api/v1/feed/admin/stats \
+curl {{BASE_URL}}/api/v1/feed/admin/stats \
   -H "Authorization: Bearer <admin_token>"
 ```
 
@@ -290,7 +290,7 @@ List all communities on the platform.
 
 **cURL:**
 ```bash
-curl "http://16.171.11.166/api/v1/communities/admin/list?limit=20" \
+curl "{{BASE_URL}}/api/v1/communities/admin/list?limit=20" \
   -H "Authorization: Bearer <admin_token>"
 ```
 
@@ -324,7 +324,7 @@ Archive (soft-delete) a community.
 
 **cURL:**
 ```bash
-curl -X DELETE http://16.171.11.166/api/v1/communities/admin/community-uuid \
+curl -X DELETE {{BASE_URL}}/api/v1/communities/admin/community-uuid \
   -H "Authorization: Bearer <admin_token>"
 ```
 
@@ -340,7 +340,7 @@ Get platform-wide community statistics.
 
 **cURL:**
 ```bash
-curl http://16.171.11.166/api/v1/communities/admin/stats \
+curl {{BASE_URL}}/api/v1/communities/admin/stats \
   -H "Authorization: Bearer <admin_token>"
 ```
 

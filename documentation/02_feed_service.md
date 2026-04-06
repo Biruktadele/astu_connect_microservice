@@ -15,7 +15,7 @@ Get the personalized timeline for the logged-in user (posts from people they fol
 
 **cURL:**
 ```bash
-curl "http://16.171.11.166/api/v1/feed/timeline?limit=30&offset=0" \
+curl "{{BASE_URL}}/api/v1/feed/timeline?limit=30&offset=0" \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -60,7 +60,7 @@ Create a new post.
 
 **cURL:**
 ```bash
-curl -X POST http://16.171.11.166/api/v1/feed/posts \
+curl -X POST {{BASE_URL}}/api/v1/feed/posts \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{"body": "Hello ASTU Connect! This is my first post.", "media_refs": []}'
@@ -91,7 +91,7 @@ Get a single post by ID.
 
 **cURL:**
 ```bash
-curl http://16.171.11.166/api/v1/feed/posts/post-uuid \
+curl {{BASE_URL}}/api/v1/feed/posts/post-uuid \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -109,7 +109,7 @@ Delete a post (only the author can delete their own post).
 
 **cURL:**
 ```bash
-curl -X DELETE http://16.171.11.166/api/v1/feed/posts/post-uuid \
+curl -X DELETE {{BASE_URL}}/api/v1/feed/posts/post-uuid \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -129,7 +129,7 @@ Get all posts by a specific user.
 
 **cURL:**
 ```bash
-curl "http://16.171.11.166/api/v1/feed/users/user-uuid/posts?limit=20" \
+curl "{{BASE_URL}}/api/v1/feed/users/user-uuid/posts?limit=20" \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -146,7 +146,7 @@ Get all comments for a post.
 
 **cURL:**
 ```bash
-curl "http://16.171.11.166/api/v1/feed/posts/post-uuid/comments?limit=20" \
+curl "{{BASE_URL}}/api/v1/feed/posts/post-uuid/comments?limit=20" \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -178,7 +178,7 @@ Add a comment to a post.
 
 **cURL:**
 ```bash
-curl -X POST http://16.171.11.166/api/v1/feed/posts/post-uuid/comments \
+curl -X POST {{BASE_URL}}/api/v1/feed/posts/post-uuid/comments \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{"body": "Great post!"}'
@@ -214,7 +214,7 @@ Add or change your reaction to a post.
 
 **cURL:**
 ```bash
-curl -X PUT http://16.171.11.166/api/v1/feed/posts/post-uuid/reactions \
+curl -X PUT {{BASE_URL}}/api/v1/feed/posts/post-uuid/reactions \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{"type": "love"}'
@@ -235,7 +235,7 @@ Remove your reaction from a post.
 
 **cURL:**
 ```bash
-curl -X DELETE http://16.171.11.166/api/v1/feed/posts/post-uuid/reactions \
+curl -X DELETE {{BASE_URL}}/api/v1/feed/posts/post-uuid/reactions \
   -H "Authorization: Bearer <token>"
 ```
 
