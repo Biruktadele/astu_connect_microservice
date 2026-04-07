@@ -45,3 +45,8 @@ class AuthorSnapshot:
     display_name: str = ""
     avatar_url: str = ""
     updated_at: datetime = field(default_factory=datetime.utcnow)
+@dataclass
+class SavedPost:
+    user_id: str = ""
+    post_id: str = ""
+    created_at: datetime = field(default_factory=datetime.utcnow)

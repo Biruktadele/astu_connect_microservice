@@ -5,10 +5,12 @@ from ....infrastructure.database import get_db
 from ....infrastructure.repositories import (
     PgPostRepository, PgCommentRepository, PgReactionRepository,
     RedisTimelineRepository, PgAuthorSnapshotRepository, OutboxEventPublisher,
+    PgSavedPostRepository,
 )
 from ....application.use_cases import (
     CreatePostUseCase, DeletePostUseCase, CreateCommentUseCase,
     ReactToPostUseCase, FetchTimelineUseCase,
+    ToggleSavePostUseCase, FetchSavedPostsUseCase,
 )
 from ....application.dto import (
     CreatePostDTO, PostResponse, CreateCommentDTO, CommentResponse,
@@ -28,6 +30,7 @@ def get_timeline(
     uc = FetchTimelineUseCase(
         RedisTimelineRepository(), PgPostRepository(db),
         PgAuthorSnapshotRepository(db), PgReactionRepository(db),
+        PgSavedPostRepository(db),
     )
     posts = uc.execute(user_id, offset, limit, requester_id=user_id)
     return TimelineResponse(
@@ -60,11 +63,13 @@ def get_post(
         raise HTTPException(status_code=404, detail="Post not found")
     snap = PgAuthorSnapshotRepository(db).get(post.author_id)
     my_reaction = PgReactionRepository(db).get_user_reaction(post_id, viewer) if viewer else None
+    is_saved = PgSavedPostRepository(db).is_saved(viewer, post_id) if viewer else False
     return PostResponse(
         **post.__dict__,
         author_name=snap.display_name if snap else "",
         author_avatar=snap.avatar_url if snap else "",
         my_reaction=my_reaction,
+        is_saved=is_saved,
     )
 
 
@@ -142,11 +147,49 @@ def remove_reaction(
 
 
 @router.get("/feed/users/{author_id}/posts", response_model=list[PostResponse])
-def get_user_posts(author_id: str, limit: int = 30, offset: int = 0, db: Session = Depends(get_db)):
+def get_user_posts(
+    author_id: str, limit: int = 30, offset: int = 0,
+    viewer: str = Depends(get_optional_user_id),
+    db: Session = Depends(get_db),
+):
     posts = PgPostRepository(db).find_by_author(author_id, limit, offset)
     snapshots = PgAuthorSnapshotRepository(db).get_batch([author_id])
     snap = snapshots.get(author_id)
+    saved_repo = PgSavedPostRepository(db)
     return [
-        PostResponse(**p.__dict__, author_name=snap.display_name if snap else "", author_avatar=snap.avatar_url if snap else "")
+        PostResponse(
+            **p.__dict__,
+            author_name=snap.display_name if snap else "",
+            author_avatar=snap.avatar_url if snap else "",
+            is_saved=saved_repo.is_saved(viewer, p.id) if viewer else False
+        )
         for p in posts
     ]
+
+
+@router.post("/feed/posts/{post_id}/save")
+def toggle_save_post(
+    post_id: str,
+    user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
+):
+    uc = ToggleSavePostUseCase(PgSavedPostRepository(db), PgPostRepository(db))
+    try:
+        is_saved = uc.execute(user_id, post_id)
+        db.commit()
+        return {"post_id": post_id, "is_saved": is_saved}
+    except ValueError as e:
+        db.rollback()
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.get("/feed/saved", response_model=list[PostResponse])
+def get_saved_posts(
+    limit: int = 30, offset: int = 0,
+    user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
+):
+    uc = FetchSavedPostsUseCase(PgSavedPostRepository(db), PgPostRepository(db), PgAuthorSnapshotRepository(db))
+    posts = uc.execute(user_id, offset, limit)
+    return [PostResponse(**p) for p in posts]
+

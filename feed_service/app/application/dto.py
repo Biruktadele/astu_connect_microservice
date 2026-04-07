@@ -22,6 +22,7 @@ class PostResponse(BaseModel):
     comment_count: int = 0
     moderation_status: str = "approved"
     created_at: datetime
+    is_saved: bool = False
 
     model_config = {"from_attributes": True}
 

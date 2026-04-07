@@ -8,8 +8,9 @@ from ..domain.entities import Post, Comment, Reaction, AuthorSnapshot
 from ..domain.repositories import (
     PostRepository, CommentRepository, ReactionRepository,
     TimelineRepository, AuthorSnapshotRepository, EventPublisher,
+    SavedPostRepository,
 )
-from .models import PostModel, CommentModel, ReactionModel, AuthorSnapshotModel, OutboxModel
+from .models import PostModel, CommentModel, ReactionModel, AuthorSnapshotModel, OutboxModel, SavedPostModel
 from ..core.config import settings
 
 
@@ -213,3 +214,30 @@ class OutboxEventPublisher(EventPublisher):
         )
         self.db.add(entry)
         self.db.flush()
+class PgSavedPostRepository(SavedPostRepository):
+    def __init__(self, db: Session):
+        self.db = db
+
+    def save(self, user_id: str, post_id: str) -> None:
+        m = SavedPostModel(user_id=user_id, post_id=post_id)
+        self.db.add(m)
+        self.db.flush()
+
+    def delete(self, user_id: str, post_id: str) -> None:
+        self.db.query(SavedPostModel).filter(
+            SavedPostModel.user_id == user_id,
+            SavedPostModel.post_id == post_id
+        ).delete()
+        self.db.flush()
+
+    def is_saved(self, user_id: str, post_id: str) -> bool:
+        return self.db.query(SavedPostModel).filter(
+            SavedPostModel.user_id == user_id,
+            SavedPostModel.post_id == post_id
+        ).first() is not None
+
+    def find_by_user(self, user_id: str, limit: int = 30, offset: int = 0) -> list[str]:
+        rows = self.db.query(SavedPostModel.post_id).filter(
+            SavedPostModel.user_id == user_id
+        ).order_by(SavedPostModel.created_at.desc()).limit(limit).offset(offset).all()
+        return [r[0] for r in rows]

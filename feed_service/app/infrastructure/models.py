@@ -50,3 +50,8 @@ class OutboxModel(Base):
     payload = Column(Text, nullable=False)
     created_at = Column(DateTime, server_default=func.now())
     published_at = Column(DateTime, nullable=True)
+class SavedPostModel(Base):
+    __tablename__ = "saved_posts"
+    user_id = Column(String, primary_key=True)
+    post_id = Column(String, primary_key=True)
+    created_at = Column(DateTime, server_default=func.now())

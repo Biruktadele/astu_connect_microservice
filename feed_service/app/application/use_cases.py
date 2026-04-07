@@ -9,6 +9,7 @@ from ..domain.entities import Post, Comment, Reaction
 from ..domain.repositories import (
     PostRepository, CommentRepository, ReactionRepository,
     TimelineRepository, AuthorSnapshotRepository, EventPublisher,
+    SavedPostRepository,
 )
 
 logger = logging.getLogger(__name__)
@@ -146,11 +147,13 @@ class FetchTimelineUseCase:
     def __init__(
         self, timeline_repo: TimelineRepository, post_repo: PostRepository,
         author_repo: AuthorSnapshotRepository, reaction_repo: ReactionRepository,
+        saved_repo: SavedPostRepository,
     ):
         self.timeline_repo = timeline_repo
         self.post_repo = post_repo
         self.author_repo = author_repo
         self.reaction_repo = reaction_repo
+        self.saved_repo = saved_repo
 
     def execute(self, user_id: str, offset: int = 0, limit: int = 30, requester_id: str = "") -> list[dict]:
         personal_target = max(1, math.ceil(limit * settings.FEED_MIX_PERSONAL / 100))
@@ -206,10 +209,58 @@ class FetchTimelineUseCase:
         for p in posts:
             snap = snapshots.get(p.author_id)
             my_reaction = self.reaction_repo.get_user_reaction(p.id, requester_id) if requester_id else None
+            is_saved = self.saved_repo.is_saved(requester_id, p.id) if requester_id else False
             result.append({
                 **p.__dict__,
                 "author_name": snap.display_name if snap else "",
                 "author_avatar": snap.avatar_url if snap else "",
                 "my_reaction": my_reaction,
+                "is_saved": is_saved,
             })
         return result
+class ToggleSavePostUseCase:
+    def __init__(self, saved_repo: SavedPostRepository, post_repo: PostRepository):
+        self.saved_repo = saved_repo
+        self.post_repo = post_repo
+
+    def execute(self, user_id: str, post_id: str) -> bool:
+        post = self.post_repo.find_by_id(post_id)
+        if not post:
+            raise ValueError("Post not found")
+        
+        if self.saved_repo.is_saved(user_id, post_id):
+            self.saved_repo.delete(user_id, post_id)
+            return False
+        else:
+            self.saved_repo.save(user_id, post_id)
+            return True
+
+
+class FetchSavedPostsUseCase:
+    def __init__(self, saved_repo: SavedPostRepository, post_repo: PostRepository, author_repo: AuthorSnapshotRepository):
+        self.saved_repo = saved_repo
+        self.post_repo = post_repo
+        self.author_repo = author_repo
+
+    def execute(self, user_id: str, offset: int = 0, limit: int = 30) -> list[dict]:
+        post_ids = self.saved_repo.find_by_user(user_id, limit, offset)
+        if not post_ids:
+            return []
+        
+        posts = self.post_repo.find_by_ids(post_ids)
+        # Sort by the order in post_ids (saved order)
+        order = {pid: i for i, pid in enumerate(post_ids)}
+        posts.sort(key=lambda p: order.get(p.id, 999))
+
+        author_ids = list({p.author_id for p in posts})
+        snapshots = self.author_repo.get_batch(author_ids)
+
+        return [
+            {
+                **p.__dict__,
+                "author_name": snapshots[p.author_id].display_name if p.author_id in snapshots else "",
+                "author_avatar": snapshots[p.author_id].avatar_url if p.author_id in snapshots else "",
+                "is_saved": True
+            }
+            for p in posts
+        ]
