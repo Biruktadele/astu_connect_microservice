@@ -88,7 +88,11 @@ def get_comments(post_id: str, limit: int = 50, offset: int = 0, db: Session = D
     comments = PgCommentRepository(db).find_by_post(post_id, limit, offset)
     snapshots = PgAuthorSnapshotRepository(db).get_batch([c.author_id for c in comments])
     return [
-        CommentResponse(**c.__dict__, author_name=snapshots.get(c.author_id, None) and snapshots[c.author_id].display_name or "")
+        CommentResponse(
+            **c.__dict__,
+            author_name=snapshots.get(c.author_id, None) and snapshots[c.author_id].display_name or "",
+            author_avatar=snapshots.get(c.author_id, None) and snapshots[c.author_id].avatar_url or ""
+        )
         for c in comments
     ]
 
@@ -103,7 +107,7 @@ def create_comment(
     try:
         comment = uc.execute(post_id, user_id, dto.body)
         db.commit()
-        return CommentResponse(**comment.__dict__, author_name="")
+        return CommentResponse(**comment.__dict__, author_name="", author_avatar="")
     except ValueError as e:
         db.rollback()
         raise HTTPException(status_code=400, detail=str(e))

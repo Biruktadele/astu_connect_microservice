@@ -25,12 +25,12 @@ Register a new ASTU student account. Email must end in `@astu.edu.et` or `.edu.e
 
 **cURL:**
 ```bash
-curl -X POST {{BASE_URL}}/api/v1/auth/register \
+curl -X POST  http://13.63.134.156/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "biruktadele55@gmail.com",
+    "email": "dagibura33@gmail.com",
     "username": "biruk_tadele",
-    "password": "SecurePassword123!",
+    "password": "12345678",
     "display_name": "Biruk Tadele",
     "department": "Computer Science",
     "year_of_study": 3

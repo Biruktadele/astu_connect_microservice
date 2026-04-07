@@ -35,6 +35,7 @@ class CommentResponse(BaseModel):
     post_id: str
     author_id: str
     author_name: str = ""
+    author_avatar: str = ""
     body: str
     created_at: datetime
 

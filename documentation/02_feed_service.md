@@ -158,6 +158,7 @@ curl "{{BASE_URL}}/api/v1/feed/posts/post-uuid/comments?limit=20" \
     "post_id": "post-uuid",
     "author_id": "user-uuid",
     "author_name": "John Doe",
+    "author_avatar": "https://res.cloudinary.com/.../avatar.jpg",
     "body": "Great post!",
     "created_at": "2026-04-05T10:05:00"
   }
@@ -191,6 +192,7 @@ curl -X POST {{BASE_URL}}/api/v1/feed/posts/post-uuid/comments \
   "post_id": "post-uuid",
   "author_id": "user-uuid",
   "author_name": "",
+  "author_avatar": "",
   "body": "Great post!",
   "created_at": "2026-04-05T10:05:00"
 }
