@@ -14,6 +14,14 @@ def run_add_column_migrations():
     try:
         with engine.connect() as conn:
             conn.execute(text("ALTER TABLE posts ADD COLUMN IF NOT EXISTS moderation_status VARCHAR DEFAULT 'approved'"))
+            conn.execute(text("""
+                CREATE TABLE IF NOT EXISTS saved_posts (
+                    user_id VARCHAR NOT NULL,
+                    post_id VARCHAR NOT NULL,
+                    created_at TIMESTAMP DEFAULT NOW(),
+                    PRIMARY KEY (user_id, post_id)
+                )
+            """))
             conn.commit()
         logger.info("Feed add-column migrations applied")
     except Exception as e:
