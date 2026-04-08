@@ -14,11 +14,7 @@ from ....infrastructure.cloudinary_client import (
     is_cloudinary_url,
 )
 from ....infrastructure.compression import get_media_type, compress_image, compress_video
-from ....infrastructure.moderation import (
-    ModerationUnavailableError,
-    scan_image as nsfw_scan_image,
-    scan_video as nsfw_scan_video,
-)
+from ....infrastructure.moderation import scan_image as nsfw_scan_image, scan_video as nsfw_scan_video
 from ....core.config import settings
 from ..deps import get_current_user_id
 
@@ -93,16 +89,10 @@ async def upload_media(
         data, content_type = compress_video(data, content_type, filename)
         resource_type = "video"
 
-    try:
-        if media_type == "image":
-            moderation = nsfw_scan_image(data)
-        else:
-            moderation = nsfw_scan_video(data)
-    except ModerationUnavailableError:
-        raise HTTPException(
-            status_code=503,
-            detail="Content moderation is unavailable. Upload rejected.",
-        )
+    if media_type == "image":
+        moderation = nsfw_scan_image(data)
+    else:
+        moderation = nsfw_scan_video(data)
 
     is_flagged = moderation["is_flagged"]
     labels = moderation["labels"]

@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
 
     CONTENT_MODERATION_ENABLED: bool = True
-    NSFW_THRESHOLD: float = 0.45
+    NSFW_THRESHOLD: float = 0.6
 
     FEED_REDIS_URL: str = "redis://redis-feed:6379/0"
 
