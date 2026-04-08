@@ -94,6 +94,26 @@ async def upload_media(
     else:
         moderation = nsfw_scan_video(data)
 
+    is_flagged = moderation["is_flagged"]
+    labels = moderation["labels"]
+
+    if is_flagged:
+        try:
+            r = _get_redis()
+            blocked_key = f"moderation:blocked:{user_id}:{uuid.uuid4().hex}"
+            r.setex(blocked_key, 7200, ",".join(labels))
+            logger.warning("Blocked NSFW media from user %s — labels: %s", user_id, labels)
+        except Exception:
+            logger.exception("Failed to store blocked moderation event in Redis")
+
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "message": "NSFW content detected. Upload rejected.",
+                "moderation_labels": labels,
+            },
+        )
+
     folder = f"astu/{purpose}/{user_id}"
     public_id_prefix = f"{folder}/{uuid.uuid4().hex}"
 
@@ -107,21 +127,10 @@ async def upload_media(
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Cloudinary upload failed: {e}")
 
-    is_flagged = moderation["is_flagged"]
-    labels = moderation["labels"]
-
-    if is_flagged:
-        try:
-            r = _get_redis()
-            r.setex(f"moderation:flagged:{result['secure_url']}", 7200, ",".join(labels))
-            logger.warning("Flagged media from user %s: %s — labels: %s", user_id, result["secure_url"], labels)
-        except Exception:
-            logger.exception("Failed to store moderation flag in Redis")
-
     return CloudinaryUploadResponse(
         **result,
-        is_flagged=is_flagged,
-        moderation_labels=labels,
+        is_flagged=False,
+        moderation_labels=[],
     )
 
 

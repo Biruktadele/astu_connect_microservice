@@ -54,18 +54,16 @@ curl -X POST "{{BASE_URL}}/api/v1/media/upload?purpose=post" \
 }
 ```
 
-**Response 200 OK (NSFW content detected):**
+**Response 422 Unprocessable Entity (NSFW content detected):**
 ```json
 {
-  "url": "https://res.cloudinary.com/...",
-  "secure_url": "https://res.cloudinary.com/...",
-  "public_id": "astu/post/user-uuid/abc123",
-  "object_name": "astu/post/user-uuid/abc123",
-  "is_flagged": true,
-  "moderation_labels": ["FEMALE_BREAST_EXPOSED", "BUTTOCKS_EXPOSED"]
+  "detail": {
+    "message": "NSFW content detected. Upload rejected.",
+    "moderation_labels": ["FEMALE_BREAST_EXPOSED", "BUTTOCKS_EXPOSED"]
+  }
 }
 ```
-> The file is still uploaded but the `is_flagged: true` flag means your app should warn the user or reject the post.
+> The file is not uploaded when NSFW content is detected.
 
 **Response 400 Bad Request (wrong file type):**
 ```json
