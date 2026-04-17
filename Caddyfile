@@ -11,11 +11,15 @@
 #   Make sure ports 80 + 443 are open on your server firewall.
 
 :80 {
-    # Proxy websocket traffic directly to the chat service
-    reverse_proxy /ws/* chat-service:8000
+    # WebSocket traffic — must be declared first with handle to be mutually exclusive
+    handle /ws/* {
+        reverse_proxy chat-service:8000
+    }
 
-    # Proxy all traffic to the API gateway (internal Docker network)
-    reverse_proxy api-gateway:8000
+    # All other API/web traffic goes to the gateway
+    handle {
+        reverse_proxy api-gateway:8000
+    }
 
     # Security headers
     header {
