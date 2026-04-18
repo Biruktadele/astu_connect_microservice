@@ -21,6 +21,19 @@ class CreateCommunityUseCase:
         return saved
 
 
+class DeleteCommunityUseCase:
+    def __init__(self, cr: CommunityRepository, mr: MembershipRepository, ep: EventPublisher):
+        self.cr, self.mr, self.ep = cr, mr, ep
+
+    def execute(self, cid, requester_id):
+        m = self.mr.find(cid, requester_id)
+        if not m or m.role != "owner":
+            raise ValueError("Not authorized")
+        if not self.cr.delete(cid):
+            raise ValueError("Community not found")
+        self.ep.publish("community.deleted", "community.events", cid, {"community_id": cid})
+
+
 class JoinCommunityUseCase:
     def __init__(self, cr: CommunityRepository, mr: MembershipRepository, ep: EventPublisher):
         self.cr, self.mr, self.ep = cr, mr, ep

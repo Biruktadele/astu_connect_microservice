@@ -21,3 +21,11 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)):
 @router.get("/me", response_model=UserActive)
 def read_user_me(current_user: User = Depends(deps.get_current_user)):
     return current_user
+
+
+@router.delete("/me", response_model=UserActive)
+def deactivate_user_me(
+    current_user: User = Depends(deps.get_current_user),
+    db: Session = Depends(get_db)
+):
+    return user_service.deactivate_user(db, user=current_user)

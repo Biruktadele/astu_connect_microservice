@@ -57,6 +57,14 @@ class PgCommunityRepository(CommunityRepository):
             {CommunityModel.member_count: CommunityModel.member_count + delta})
         self.db.flush()
 
+    def delete(self, cid):
+        m = self.db.query(CommunityModel).filter(CommunityModel.id == cid).first()
+        if m:
+            m.is_archived = True
+            self.db.flush()
+            return True
+        return False
+
 
 class PgMembershipRepository(MembershipRepository):
     def __init__(self, db: Session): self.db = db

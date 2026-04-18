@@ -8,6 +8,7 @@ from ....infrastructure.repositories import (
 from ....application.use_cases import (
     CreateCommunityUseCase, JoinCommunityUseCase, LeaveCommunityUseCase,
     SetMemberRoleUseCase, CreateCommunityPostUseCase, ModeratePostUseCase,
+    DeleteCommunityUseCase,
 )
 from ....application.dto import (
     CreateCommunityDTO, UpdateCommunityDTO, CommunityResponse,
@@ -102,6 +103,17 @@ def join_community(community_id: str, user_id: str = Depends(get_current_user_id
 @router.post("/{community_id}/leave", status_code=204)
 def leave_community(community_id: str, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
     uc = LeaveCommunityUseCase(PgCommunityRepository(db), PgMembershipRepository(db), OutboxEventPublisher(db))
+    try:
+        uc.execute(community_id, user_id)
+        db.commit()
+    except ValueError as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.delete("/{community_id}", status_code=204)
+def delete_community(community_id: str, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    uc = DeleteCommunityUseCase(PgCommunityRepository(db), PgMembershipRepository(db), OutboxEventPublisher(db))
     try:
         uc.execute(community_id, user_id)
         db.commit()
