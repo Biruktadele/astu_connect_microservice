@@ -71,6 +71,13 @@ class PgPostRepository(PostRepository):
         )
         self.db.flush()
 
+    def find_recent(self, limit: int, offset: int = 0) -> list[Post]:
+        rows = self.db.query(PostModel).filter(
+            PostModel.is_deleted == False,
+            PostModel.moderation_status != "rejected",
+        ).order_by(PostModel.created_at.desc()).limit(limit).offset(offset).all()
+        return [_post_to_entity(r) for r in rows]
+
 
 class PgCommentRepository(CommentRepository):
     def __init__(self, db: Session):

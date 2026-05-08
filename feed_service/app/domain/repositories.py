@@ -25,6 +25,9 @@ class PostRepository(ABC):
     @abstractmethod
     def update_reaction_counts(self, post_id: str, counts: dict) -> None: ...
 
+    @abstractmethod
+    def find_recent(self, limit: int, offset: int) -> list[Post]: ...
+
 
 class CommentRepository(ABC):
     @abstractmethod

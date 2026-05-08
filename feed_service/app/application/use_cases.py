@@ -195,12 +195,15 @@ class FetchTimelineUseCase:
                 merged.append(pid)
                 added_recent += 1
 
+        # ── PostgreSQL fallback when Redis is empty (cold start / Redis flush) ──
         if not merged:
-            return []
-
-        posts = self.post_repo.find_by_ids(merged)
-        posts = [p for p in posts if not p.is_deleted and p.moderation_status != "rejected"]
-        posts.sort(key=lambda p: p.created_at, reverse=True)
+            logger.warning("Timeline Redis queues all empty for user %s — falling back to PG", user_id)
+            posts = self.post_repo.find_recent(limit=limit, offset=offset)
+            posts = [p for p in posts if not p.is_deleted and p.moderation_status != "rejected"]
+        else:
+            posts = self.post_repo.find_by_ids(merged)
+            posts = [p for p in posts if not p.is_deleted and p.moderation_status != "rejected"]
+            posts.sort(key=lambda p: p.created_at, reverse=True)
 
         author_ids = list({p.author_id for p in posts})
         snapshots = self.author_repo.get_batch(author_ids)
